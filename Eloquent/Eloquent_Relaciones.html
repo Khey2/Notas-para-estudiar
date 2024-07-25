@@ -1,0 +1,2921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eloquent - Relaciones</title>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        background-color: #171923;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 7px;
+    }
+    .section{
+        margin-top: 22px;
+    }
+    .main--title{
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+    .subtitule{
+        margin-bottom: 10px;
+        margin-top: 14px;
+    }
+    #hash{
+        color: rgba(255, 0, 0, 0.709);
+    }
+    .description{
+        padding-left: 26px;
+        line-height: 1.8;
+        font-size: 18px;
+    }
+    .code{
+        background-color: #08090c;
+        margin: 23px 0px;
+    }
+    .sub--subtitule{
+        margin-bottom: 10px;
+        margin-top: 12px;
+    }
+    .u-list{
+        margin-left: 67px;
+        font-size: 18px;
+    }
+    .u-list li::marker{
+        color: red;
+    }
+    .functions{
+        background-color: #252a37 ;
+        color: #eb4432;
+    }
+
+
+    table {
+            border-collapse: collapse;
+            width: 100%;
+            text-align: center;
+        }
+  
+        table, th, td {
+            border: 1px solid white;
+
+        }
+
+        th{
+            padding: 8px;
+            text-align: center;
+        }
+        td{
+            text-align: left;
+        }
+</style>
+<body>
+    <h1 class="main--title">Eloquent ORM introduccion</h1>
+    <section class="sesction">
+        <h2 class="subtitule"><span id="hash">#</span>Introduccion</h2>
+
+        <p class="description">
+            Los modelos manejan algo llamado "relaciones", basicamente, es la manera de relacionarlos entre si
+            para indicar por ejemplo un "usuario" tiene muchos "Blogs publicados" 
+            ( <span class="functions">one to Many</span> ). existen MUCHAS relaciones y las veremos a lo largo de este
+            documento.
+            <ul class="u-list">
+                <li>
+                    <span class="functions">One to One</span>
+                </li>
+                <li>
+                    <span class="functions">One to Many</span>
+                </li>
+                <li>
+                    <span class="functions">Has One Through</span>
+                </li>
+                <li>
+                    <span class="functions">Has Many Through</span>
+                </li>
+                <li>
+                    <span class="functions">One To One ( Polimorfica )</span>
+                </li>
+                <li>
+                    <span class="functions">One To Many ( Polimorfica )</span>
+                </li>
+                <li>
+                    <span class="functions">Many To Many ( Polimorfica )</span>
+                </li>
+            </ul>
+        </p>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"><span id="hash">#</span>Definiendo relaciones</h2>
+        <p class="description">
+            Las relaciones son definidas como metodos en tu tu clase de Modelo de eloquent.
+            esto te prove la capacidad de encadenar metodos de modelos ( debido a que la relacion es un query builder tambien )
+    
+        </p>
+        <pre class="code">
+    
+            $user->posts()->where('active', 1)->get();
+        </pre>
+
+        <h3 class="subtitule"><span id="hash">#</span>One To One ( uno a uno )</h3>
+        <p class="description">
+            <span class="functions">One To One</span> esta relacionada a "uno a uno" , osea, es vincular
+            1 registro de una tabla a 1 registro de otra tabla.
+
+            1 usuario tiene 1 telefono asignado
+        </p>
+        <p class="description">
+            Para definir esta relacion en nuestro modelo debemos crearla como una funcion y debe de retornar
+            la llamada al metodo <span class="functions">hasOne</span>
+        </p>
+        <pre class="code">
+
+             
+            namespace App\Models;
+            
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\HasOne;
+            
+            class User extends Model
+            {
+                /**
+                * Get the phone associated with the user.
+                */
+                public function phone(): HasOne
+                {
+                    return $this->hasOne(Phone::class);
+                }
+            }
+        </pre>
+        <p class="description">
+            Como ves, el metodo phone ( nombre definido por nosotros ) llama a un metodo que hereda de modelo
+            ( por eso se usa $this ) llamado <span class="functions">hasOne</span> y recibe como argumento
+            el MODELO a cual se va a relacionar ( en este caso el modelo <span class="functions">Phone</span> )
+        </p>
+        <p class="description">
+            Una vez definida esta relacion, puedes recuperar el registro relacionado usando las
+            propiedades dinamicas de eloquent, osea, puedes acceder a la relacion como si fuera una propiedad
+            del modelo.
+        </p>
+        <pre class="code">
+
+            $phone = User::find(1)->phone;
+        </pre>
+        <p class="description">
+            NOTA, aqui se usan ciertas convenciones de nombre, por ejemplo, ELOQUENT determina el
+            nombre de la columna que servira como llave foranea en la tabla Phone gracias al nombre de quien se conecta
+            a ella ( osea User ), eloquent toma este nombre del modelo user y le aplica snake case
+            + le añade el id. quedando
+
+            <span class="functions"> User = "user_id"</span>
+
+            si Phone NO tiene una columna llamada user_id, la relacion no podra hacerse, en caso de que quieras apuntar
+            la llave foranea a otro campo, debes de mandar un segundo argumento indicando el nombre de columna
+            que servira como llave FORANEA dentro del modelo HIJO
+        </p>
+        <pre class="code">
+
+            //"foreign_key" es el nombre de la columna DENTRO de Phone table que se conectara 
+            //a User en la columna "id" 
+            return $this->hasOne(Phone::class, 'foreign_key');
+        </pre>
+        <p class="description">
+            Adicionalmente, si en tu modelo "padre" ( osea User )  cuentas con una columna id para identificar
+            registros unicos ( la primary key ) pero que tiene otro nombre diferente a id, entonces deberas mandarle un
+            tercer argumento al metodo <span class="functions">hasOne</span> indicando la columna que funciona
+            como Primary  Key de User
+        </p>
+        <pre class="code">
+
+            return $this->hasOne(Phone::class, 'foreign_key', 'local_key');
+        </pre>
+
+        <h3 class="subtitule"><span id="hash">#</span>Definendo la relacion INVERSA de One To One</h3>
+        <p class="description">
+            En este punto ya puedes saber que "telefono tiene 1 usuario", pero ahora, si quieres saber
+            "este telefono PERTENECE a este usuario", debes definir una relacion inversa, esto se logra
+            usando <span class="functions">belongsTo</span> el cual es LO INVERSO A  
+            <span class="functions">hasOne</span>
+        </p>
+        <pre class="code">
+
+            namespace App\Models;
+ 
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\BelongsTo;
+            
+            class Phone extends Model
+            {
+                /**
+                * Get the user that owns the phone.
+                */
+                public function user(): BelongsTo
+                {
+                    return $this->belongsTo(User::class);
+                }
+            }
+        </pre>
+        <p class="description">
+            Ahora, cuando uses el metodo user ( como propiedad ) en un modelo de tipo Phone, eloquent va a
+            tratar de buscar un Modelo de <span class="functions">User</span> en el cual la columna "
+            id" de este coincida con la columna "user_id" de el modelo Phone, como se menciono antes, eloquent asume el nombre de la foreign key
+            mediante el nombre de su padre en "snake_case" y con sufijo id quedando "user_id" el nombre de la columna
+        </p>
+        <p class="description">
+            Puedes cambiar este comportamiento
+        </p>
+        <pre class="code">
+
+
+            //foreign key = COLUMNA DE PHONE que buscara en User
+            /**
+            * Get the user that owns the phone.
+            */
+            public function user(): BelongsTo
+            {
+                return $this->belongsTo(User::class, 'foreign_key');
+            }
+
+            
+
+            //owner key = Columna de User que conectara a la foreign  Key de phone 
+            /**
+            * Get the user that owns the phone.
+            */
+            public function user(): BelongsTo
+            {
+                return $this->belongsTo(User::class, 'foreign_key', 'owner_key');
+            }
+        </pre>
+
+
+
+
+        <h3 class="subtitule"><span id="hash">#</span>Has One of Many ( tiene 1 de muchos )</h3>
+        <p class="description">
+            algunas veces, 1 modelos puede tener MUCHOS modelos 
+            osea <span class="functions">1 tabla esta relacionada a MUCHOS REGISTROS de otra tabla</span>
+            por ejemplo, puedes definir relaciones para sacar el registro mas viejo
+             y el mas nuevo , en estos casos, puedes lograr esto ( obtener el usuario mas 
+             actual o el usuario mas viejo ) usando 
+             <span class="functions">hasOne</span> combinado con los metodos
+             <span class="functions">ofMany</span>
+        </p>
+        <pre class="code">
+            
+            /**
+            * Get the user's most recent order.
+            */
+            public function latestOrder(): HasOne
+            {
+                return $this->hasOne(Order::class)->latestOfMany();
+            }
+
+
+            /**
+            * Get the user's oldest order.
+            */
+            public function oldestOrder(): HasOne
+            {
+                return $this->hasOne(Order::class)->oldestOfMany();
+            }
+        </pre>
+
+        <p class="description">
+            Nota, <span class="functions">ofMany</span> te devuelve modelos ORDENANDOLOS por 
+            su id autoincremental, pero, habra veces donde deseas que se ordene de otra manera.
+
+            por ejemplo, talvez quieres filtrar lo que obtengas por el maximo precio de la columna, como segundo
+            argumento, este metodo acepta el tipo de ordenamiento
+            ( <span class="functions">min</span> o <span class="functions">max</span> )
+        </p>
+
+        <pre class="code">
+
+            /**
+            * Get the user's largest order.
+            */
+            public function largestOrder(): HasOne
+            {
+                return $this->hasOne(Order::class)->ofMany('price', 'max');
+            }
+        </pre>
+        <p class="functions">
+            NOTA, postgreSQL no tiene soporte para MAX en UUID, asi que , es imposible usar
+            en postgreSQL relaciones one-of-many en combinacion con columnas UUID
+        </p>
+
+
+    <p class="description">
+
+        "Con frecuencia, al recuperar un modelo único utilizando los métodos latestOfMany,
+        oldestOfMany o ofMany, ya tienes definida una relación 'has many' para el mismo modelo. 
+        Para mayor conveniencia, Laravel te permite convertir fácilmente esta
+        relación en una relación 'has one' invocando el método one en la relación."
+    </p>
+    <pre class="code">
+
+        /**
+        * Get the user's orders.
+        */
+       public function orders(): HasMany
+       {
+           return $this->hasMany(Order::class);
+       }
+        
+       /**
+        * Get the user's largest order.
+        */
+       public function largestOrder(): HasOne
+       {
+           return $this->orders()->one()->ofMany('price', 'max');
+       }        
+
+    </pre>
+    <p class="description">
+        Como ves, ya tenias una relacion llamada DEL TIPO "hasMany" ( tiene muchos, por lo tanto
+        de tevuelve una collection de modelos relacionados ) y la convertimos abajo para que solo
+        traiga 1 modelos de todos ellos en otra relacion gracias al metodo 
+        <span class="functions">one</span> y al metodo 
+        <span class="functions">ofMany</span> trabajando juntos
+    </p>
+
+    <h3 class="subtitule"><span id="hash">#</span>Relaciones AVANZADAS usando Has One Of Many</h3>
+    <p class="description">
+        es posible contruir cosas mas avanzadas usando "Has One Of Many", por ejemplo:
+        un modelo de tipo <span class="functions">Product</span> puede tener muchos 
+        modelos de tipo <span class="functions">Price</span> 
+        "un producto tiene MUCHOS precios distintos" y algunos de estos precios son precios
+         que se busca aplicar
+        en un futuro y otros son actuales ( osea, estas en junio del 2024 y ya se tienen programados precios de ese producto 
+        para diciembre ). EN ESTE CASO, las fechas de los precios seran publicadas de acuerdo a una columna
+        que tiene Price llamada <span class="functions">published_at</span>. EN RESUMEN:
+
+        <ul class="u-list">
+            <li>
+                Necesitas recuperar el precio publicado MAS ACTUAL el cual NO SUPERE la fecha actual 
+                ( que no sea del futuro )
+            </li>
+            <li>
+                Adicionalmente, si 2 registros tienen la misma fecha de publicacion, tomar la del id mas actual
+            </li>
+        </ul>
+    </p>
+    <p class="description">
+        Esto puede sonar algo engorroso, pero, se lograria de esta manera:
+    </p>
+
+    <pre class="code">
+
+        /**
+        * Get the current pricing for the product.
+        */
+        public function currentPricing(): HasOne
+        {
+            return $this->hasOne(Price::class)->ofMany([
+                'published_at' => 'max',
+                'id' => 'max',
+            ], function (Builder $query) {
+                $query->where('published_at', '<', now());
+            });
+        }
+    </pre>
+
+    <p class="description">
+        como ves:
+
+        <ul class="u-list">
+            <li>
+                <span class="functions">ofMany</span> recibe un array que determina las columnas que ordenara y en que condiciones lo hara
+                ( en este caso se usan 2 columnas y se ordenan por "max")
+            </li>
+            <li>
+                <span class="functions">ofMany</span> recibe un SEGUNDO argumento, el cual es un clousure
+                que agrega mas reglas al $query ( ene ste caso checa que la fecha de publicacion 
+                se mnero a la fecha actual de la vida real )
+            </li>
+        </ul>
+    </p>
+
+    <h3 class="subtitule"><span id="hash">#</span>Has One Through ( Tiene uno atravez de )</h3>
+    <p class="description">
+        Aqui entramos a algo un poquito mas avanzado xd, en contexto de bases de datos, existe una relacion llamada
+        <span class="functions">Has One Through</span> la cual indica que el modelo A esta relacionado con un modelo C y que para
+        poder acceder el modelo A al C necesita pasar por un modelo intermedio llamado B
+
+        osea... necesitamos un Modelo intermedio para poder relacionar a A con B. veamos algo practico
+    </p>
+    <p class="description">
+        Imagina una aplicacion para reparar vehiculos. cada <span class="functions">Mecanico</span>
+        tiene asignado un <span class="functions">Carro</span> y cada Carro PERTENECE a un 
+        <span class="functions">dueño</span>. En este ejemplo un <span class="functions">Mecanico</span>
+         y un  <span class="functions">dueño</span> 
+        no estan relacionados directamente.
+    </p>
+    <p class="description">
+        ENTONCES Has One Through nos ayuda a relacionar al
+        <span class="functions">Mecanico</span> con el
+        <span class="functions">dueño</span> pasandro atravez de el
+        <span class="functions">carro</span>
+
+        a continuacion se muestra una abstraccion de las tablas que se usarian:
+    </p>
+    <pre class="code">
+
+        mechanics
+            id - integer
+            name - string
+        
+        cars
+            id - integer
+            model - string
+            mechanic_id - integer
+        
+        owners
+            id - integer
+            name - string
+            car_id - integer
+    </pre>
+    <p class="description">
+        Ahora, veamos como se haria esta relacion
+    </p>
+    <pre class="code">
+         
+            namespace App\Models;
+            
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+            
+            class Mechanic extends Model
+            {
+                /**
+                * Get the car's owner.
+                */
+                public function carOwner(): HasOneThrough
+                {
+                    return $this->hasOneThrough(Owner::class, Car::class);
+                }
+            }
+    </pre>
+    <p class="description">
+        Expliquemos los argumentos pasados a <span class="fucntions">hasOneThrough</span>
+
+        <ul class="u-list">
+            <li>
+                el PRIMER argumento pasado, es el nombre del modelo FINAL ( C ) al cual deseas
+                acceder
+            </li>
+            <li>
+                el SEGUNDO argumento , es el nombre del modelo ATRAVEZ ( B ) del cual se pasara
+                ( osea el modelo intermedio )
+            </li>
+        </ul>
+    </p>
+    <p class="description">
+        Adicionalmente, si las relaciones relevantes YA HAN SIDO DEFINIDAS ( osea los metodos de relacion ya los hiciste 
+        conectando Mecanico a carro con <span class="functions">hasOne</span> y carro a dueño con
+        <span class="functions">hasOne</span> de nuevo ). PUEDES usar esta otra sintaxis para hacer la conexion
+    </p>
+    <pre class="code">
+
+        // String based syntax...
+        return $this->through('cars')->has('owner');
+        
+        // Dynamic syntax...
+        return $this->throughCars()->hasOwner();
+    </pre>
+
+    <h3 class="subtitule"><span id="hash">#</span> Key conventions ( Convenciones de llave )</h3>
+    <p class="description">
+        hay varias convenciones en este metodo al igual que todas las relaciones, al final es lo mismo, si
+        tienes las columnas nombradas de otra manera deberas espesificar manualmente la conexion de primary Keys
+        con foreign keys, en este caso al ser 3 modelos sera mas extenso.
+    </p>
+
+    <pre class="code">
+
+        class Mechanic extends Model
+        {
+            /**
+            * Get the car's owner.
+            */
+            public function carOwner(): HasOneThrough
+            {
+                return $this->hasOneThrough(
+                    Owner::class,
+                    Car::class,
+                    'mechanic_id', // Foreign key on the cars table...
+                    'car_id', // Foreign key on the owners table...
+                    'id', // Local key on the mechanics table...
+                    'id' // Local key on the cars table...
+                );
+            }
+        }
+    </pre>
+    <p class="description">
+        En estos casos capaz te conviene mas reutilizar definido en las relaciones por separado
+    </p>
+    <pre class="code">
+
+        // String based syntax...
+        return $this->through('cars')->has('owner');
+        
+        // Dynamic syntax...
+        return $this->throughCars()->hasOwner();
+    </pre>
+
+
+    <h3 class="subtitule"><span id="hash">#</span>Has Many Through</h3>
+    <p class="description">
+        Es el mismo principio de has On Through, pero, ahora el modelo A se relaciona a muchos del C atravez del B
+
+        ejemplo
+        tienes un modelo llamado 
+        <span class="functions">Project</span> el cual va a acceder a varios 
+        <span class="functions">Deployments ( despliegues )</span> pasando atravez de el modelo
+        <span class="functions">Environment ( ambiente )</span>, en resumen:
+
+        un projecto tiene muchos despliegues dependiendo el entorno ( en 1 entrono puedes tener 3, en otro 5 en otro 1 y asi)
+    </p>
+    <p class="description">
+        En este caso tendremos estas tablas
+    </p>
+
+    <pre class="code">
+
+        projects
+            id - integer
+            name - string
+        
+        environments
+            id - integer
+            project_id - integer
+            name - string
+        
+        deployments
+            id - integer
+            environment_id - integer
+            commit_hash - string
+    </pre>
+
+    <p class="description">
+        La relacion seria de esta manera
+    </p>
+    <pre class="code">
+
+        namespace App\Models;
+ 
+        use Illuminate\Database\Eloquent\Model;
+        use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+         
+        class Project extends Model
+        {
+            /**
+             * Get all of the deployments for the project.
+             */
+            public function deployments(): HasManyThrough
+            {
+                return $this->hasManyThrough(Deployment::class, Environment::class);
+            }
+        }
+    </pre>
+    <p class="description">
+        De nuevo, el primer argumento es a donde te quieres conectar y el segundo es
+         el modelo atravez del cual tendras que pasar, igual tienes sintaxis para reutilizar relaciones
+         ya definidas.
+    </p>
+    <pre class="code">
+
+        // String based syntax...
+        return $this->through('environments')->has('deployments');
+        
+        // Dynamic syntax...
+        return $this->throughEnvironments()->hasDeployments();
+    </pre>
+    <p class="description">
+        ¿Como funciona todo?, funciona asi:
+
+        como el modelo <span class="functions">Deployments</span> NO tiene una columna llamada
+        <span class="functions">project_id</span> ( osea no hay una relacion directa entre A y C )
+        la relacion <span class="functions">hasManyThrough</span> BUSCA dentro de la tabla intermediaria
+        la columna <span class="functions">project_id</span> y de ahi relaciona estos ids de project a deployments
+    </p>
+    <pre class="code">
+
+        class Project extends Model
+        {
+            public function deployments(): HasManyThrough
+            {
+                return $this->hasManyThrough(
+                    Deployment::class,
+                    Environment::class,
+                    'project_id', // Foreign key on the environments table...
+                    'environment_id', // Foreign key on the deployments table...
+                    'id', // Local key on the projects table...
+                    'id' // Local key on the environments table...
+                );
+            }
+        }
+    </pre>
+
+    <h3 class="subtitule"><span id="hash">#</span>Many To Many ( Muchos a Muchos )</h3>
+    <p class="description">
+        Este tipo de relaciones son un poco mas complejas que un
+        <span class="functions">hasOne</span> o un 
+        <span class="functions">hasMany</span>.
+
+        Un ejemplo de cuando podrias ocupar tu esto es cuando tienes un modelo llamado 
+        <span class="functions">User</span> el cual se relaciona con 
+        <span class="functions">roles</span>
+
+        un usuario tiene MUCHOS roles y y role tiene muchos usuarios, debido a que cada role puede estar asignado 
+        a distintos usuarios y viceveresa, un usuario puee ocupar muchos roles.
+    </p>
+
+    <h3 class="subtitule"><span id="hash">#</span>Estructura de la tabla</h3>
+    <p class="description">
+        para definir este tipo de relaciones necesitaras una tabla intermediaria ( la cual llaman tabla 
+        pivote ). entonces, crearemos 3 tablas
+        <span class="functions">users</span>
+        <span class="functions">role</span>
+        <span class="functions">role_users</span>
+
+        en este caso, la tabla tole_users va contar con 2 columnas que seran foreign keys
+        a primary keys de las otras tablas, asi podremos identificar usuario y rol asignados,
+        y puedes asignarle al usuario MUCHOS roles
+    </p>
+    <pre class="code">
+
+        users ( usuarios )
+            id - integer
+            name - string
+        
+        roles ( roles existentes )
+            id - integer
+            name - string
+        
+        role_user ( roles asignados a usuarios, PIVOTE  )
+            user_id - integer
+            role_id - integer
+    </pre>
+
+    <h3 class="subtitule"><span id="hash">#</span>Estrucutra del modelo</h3>
+    <p class="description">
+        Las relaciones Many to Many estan definidas escribiendo un metodo en el modelo que retorne
+        <span class="functions">belongsToMany</span>
+    </p>
+    <h3 class="subtitule"><span id="hash">#</span>PASO 1: Users</h3>
+    <pre class="code">
+        
+        namespace App\Models;
+        
+        use Illuminate\Database\Eloquent\Model;
+        use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+        
+        class User extends Model
+        {
+            /**
+            * The roles that belong to the user.
+            */
+            public function roles(): BelongsToMany
+            {
+                return $this->belongsToMany(Role::class);
+            }
+        }
+    </pre>
+    <p class="description">
+        Osea, 1 usuario PERTENECE a MUCHOS roles, eloquent determina la tabla PIVOTE ( intermedia )
+        uniendo el nombre de los 2 modelos en orden alfabetico! ( <span class="functions">User</span>  y <span class="functions">Role</span>)
+        buscando asi role_user, esta sera la tabla intermediaria!, pero, si quieres apuntar a otra puedes definirla
+        en un segundo parametro.
+    </p>
+    <pre class="code">
+        
+        return $this->belongsToMany(Role::class, 'role_user');
+    </pre>
+    <p class="description">
+        <ul class="u-list">
+            <li>El tercer parametro es la foreign key dentro de la tabla pivote para el modelo actual</li>
+            <li>El cuarto parametro es la foreign key dentro de la tabla pivote para el modelo AL QUE TE ESTAS CONECTANDO</li>
+        </ul>
+    </p>
+    <pre class="code">
+        
+        return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
+    </pre>
+    <h3 class="subtitule"><span id="hash">#</span>Definiendo la relacion inversa de BelongsToMany</h3>
+    <pre class="code">
+        
+        namespace App\Models;
+        
+        use Illuminate\Database\Eloquent\Model;
+        use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+        
+        class Role extends Model
+        {
+            /**
+            * The users that belong to the role.
+            */
+            public function users(): BelongsToMany
+            {
+                return $this->belongsToMany(User::class);
+            }
+        }
+    </pre>
+    <p class="description">
+        Es lo mismo, pero apuntando al modelo final a la inversa ( User::class ), e igualmente puede recibir 4 params
+    </p>
+    
+    <h3 class="subtitule"><span id="hash">#</span>Recuperando registros de la tabla intermediaria ( PIVOTE )</h3>
+    <p class="description">
+        Una vez definida la tabla PIVOTE y la relacion <span class="functions">belongsToMany</span>, eloquent te da una propiedad
+        llamada <span class="functions">pivot</span> la cual nos servira para acceder a la tabla intermedia.... basicamente
+        si A es User, B es role_user , C es Role  bas a relacionas A->B y debido al belongsToMany, tendras acceso a C si usas <span class="functions">Pivote</span>
+    </p>
+    <pre class="code">
+
+        use App\Models\User;
+        
+        $user = User::find(1);
+        
+        foreach ($user->roles as $role) {
+            echo $role->pivot->created_at;
+        }
+    </pre>
+    <p class="description">
+        <span class="functions">pivote</span> accede al registro que conecta a rol ( tiene el contexto de como se realizo la conexion entre A B C)
+    </p>
+    <p class="description">
+        Por defecto, mediante el atributo <span class="functions">pivote</span> solo podras acceder a las columnas de Foriegn Keys,
+        si tienes ams atributos en esta tabla y quieres acceder a ellos, deberas de espesificarlos manualmente con esta sintaxis.
+    </p>
+    <pre class="code">
+
+        return $this->belongsToMany(Role::class)->withPivot('active', 'created_by');
+    </pre>
+    <p class="description">
+        Aparte, si gustas traer los campoes "created_at" y "updated_at", estos son mantenidos por laravel, entonces, puedes usar el metodo
+        <span class="functions">withTimeStamps()</span>
+    </p>
+    <pre class="code">
+
+        return $this->belongsToMany(Role::class)->withTimestamps();
+    </pre>
+    <h3 class="subtitule"><span id="hash">#</span>Personalizando el nombre del atributo <span class="functions">pivote</span></h3>
+    <p class="description">
+        Si el nombre de pivote no te agrada, puedes personalizar este campo para que se llame de forma distinta, 
+        la sintaxis a usar seria:
+    </p>
+    <pre class="code">
+        
+        return $this->belongsToMany(Podcast::class)
+        ->as('subscription')
+        ->withTimestamps();
+    </pre>
+    <p class="description">
+        Ahora puedes acceder a esta tabla pivote mediante el nombre de "subscription"
+    </p>
+    <pre class="code">
+        
+        $users = User::with('podcasts')->get();
+        
+        foreach ($users->flatMap->podcasts as $podcast) {
+            echo $podcast->subscription->created_at;
+        }
+    </pre>
+    <h3 class="subtitule"><span id="hash">#</span> Filtrando la queri de la relacion <span class="functions">belongsToMany</span> </h3>
+    <p class="description">
+        puedes FILTRAR la query retornada por la relacion <span class="functions">belongsToMany</span>
+        gracias a los siquientes metodos:
+        <ul class="u-list">
+            <li>
+                <span class="functions">wherePivot</span>
+            </li>
+            <li>
+                <span class="functions">wherePivotIn</span>
+            </li>
+            <li>
+                <span class="functions">wherPivotNotIn</span>
+            </li>
+            <li>
+                <span class="functions">wherePivotBeetwen</span>
+            </li>
+            <li>
+                <span class="functions">wherePivotNull</span>
+            </li>
+            <li>
+                <span class="functions">wherePivotNotNull</span>
+            </li>
+        </ul>
+    </p>
+    <pre class="code">
+        
+        return $this->belongsToMany(Role::class)
+        ->wherePivot('approved', 1);
+        
+        return $this->belongsToMany(Role::class)
+        ->wherePivotIn('priority', [1, 2]);
+        
+        return $this->belongsToMany(Role::class)
+        ->wherePivotNotIn('priority', [1, 2]);
+        
+        return $this->belongsToMany(Podcast::class)
+        ->as('subscriptions')
+        ->wherePivotBetween('created_at', ['2020-01-01 00:00:00', '2020-12-31 00:00:00']);
+        
+        return $this->belongsToMany(Podcast::class)
+        ->as('subscriptions')
+        ->wherePivotNotBetween('created_at', ['2020-01-01 00:00:00', '2020-12-31 00:00:00']);
+        
+        return $this->belongsToMany(Podcast::class)
+        ->as('subscriptions')
+        ->wherePivotNull('expired_at');
+        
+        return $this->belongsToMany(Podcast::class)
+        ->as('subscriptions')
+        ->wherePivotNotNull('expired_at');
+    </pre>
+
+
+    <h3 class="subtitule"><span id="hash">#</span> Definiendo un modelo personalizado como tabla pivote </h3>
+    <p class="description">
+        Si quieres definir un modelo personalizado para que funcione como la tabla PIVOTE puedes:
+    </p>
+    <pre class="code">
+
+        namespace App\Models;
+ 
+        use Illuminate\Database\Eloquent\Model;
+        use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+        
+        class Role extends Model
+        {
+            /**
+            * The users that belong to the role.
+            */
+            public function users(): BelongsToMany
+            {
+                return $this->belongsToMany(User::class)->using(RoleUser::class);
+            }
+        }
+    </pre>
+    <p class="description">
+        RoleUser al definirlo, debe heredar de Pivot
+    </p>
+    <pre class="code">
+
+        namespace App\Models;
+        
+        use Illuminate\Database\Eloquent\Relations\Pivot;
+        
+        class RoleUser extends Pivot
+        {
+            // ...
+        }
+    </pre>
+    <p class="description">
+        Como nota las clases pivot no soportan <span>Soft Deletes</span>, si se desea esta funcionalidad, deberias de usar un 
+        MODELO real de eloquent, y como extra, si necesitas que la tabla pivote que creaste TU tenga un ID autoincremental, debes indicarlo
+    </p>
+    <pre class="code">
+
+        /**
+        * Indicates if the IDs are auto-incrementing.
+        *
+        * @var bool
+        */
+        public $incrementing = true;
+    </pre>
+
+    <h2 class="subtitule"><span id="hash">#</span>Relaciones Polimorficas</h2>
+    <p class="description">
+        Las relaciones polimorficas permiten que el MODELO HIJO pertenezca a varios modelos padres cpn una simple 
+        asosiacion
+        por ejemplo: en una aplicacion de social media, el modelo hijo <span class="functions">Comment</span>
+        puede pertenecer a el modelo padre <span class="functions">Post</span> y al modelo padre <span class="functions">Video</span>
+    </p>
+    
+    <h3 class="sub--subtitule"><span id="hash">#</span>One To One Polimorfico</h2>
+        <p class="description">
+            Basicamente, una relacion polimorfica uno a uno te permite que 2 modelos puedan sacar informacion de 1 salo tabla ( osea, ambos modelos comparten registros )
+            de 1 misma tabla. imagina que tienes una tabla llamada <span class="functions">Post</span> y otra llamada <span>User</span> y ambas tendran una relacion polimorfica
+            uno a uno a la tabla <span class="functions">Images</span>
+        </p>
+        <pre class="code">
+            posts
+                id - integer
+                name - string
+            
+            users
+                id - integer
+                name - string
+            
+            images
+                id - integer
+                url - string
+                imageable_id - integer
+                imageable_type - string
+        </pre>
+        <p class="description">
+            el campo <span class="functions">imageable_id</span> va a contener el valor del ID del post o del usuario ( puede ser cualqueira de los 2 )
+            mientras que el campo <span class="functions">imageable_type</span> va a guardar el nombre de la clase del padre! osea, se identificara
+            con este campo si el ID pertenece a User o a Post, este campo se usara para que laravel sepa resolver que tipo de modelo retornarte al acceder
+            a la relacion del modelo.
+
+            osea, esta columna contendra uno de estos 2 valores: <span class="functions">App\Models\Post</span> o <span class="functions">App\Models\User</span>
+        </p>
+
+
+        <h3 class="sub--subtitule"><span id="hash">#</span> Estructura del modelo</h2>
+        <p class="description">
+            aqui veremos como se deben definir los 3 modelos que participarane ne sta relacion polimorfica 1 a 1
+        </p>
+        <pre class="code">
+
+            // Image Model ( la tabla central )
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\MorphTo;
+            
+            class Image extends Model
+            {
+                /**
+                * Get the parent imageable model (user or post).
+                */
+                public function imageable(): MorphTo
+                {
+                    return $this->morphTo();
+                }
+            }
+
+
+
+
+            // Post Model
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\MorphOne;
+            
+            class Post extends Model
+            {
+                /**
+                * Get the post's image.
+                */
+                public function image(): MorphOne
+                {
+                    return $this->morphOne(Image::class, 'imageable');
+                }
+            }
+
+
+
+            //User model
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\MorphOne;
+            
+            class User extends Model
+            {
+                /**
+                * Get the user's image.
+                */
+                public function image(): MorphOne
+                {
+                    return $this->morphOne(Image::class, 'imageable');
+                }
+            }
+
+        </pre>
+
+        <h3 class="sub--subtitule"><span id="hash">#</span> Recuperando la relacion </h2>
+        <p class="description">
+            una vez has definido tu tabla y modelos, puedes acceder a la relacion via tus modelos. para recuperar una imagen de un post, simplemente
+            podemos acceder a la relacuion definida "image"
+        </p>
+        <pre class="code">
+
+            use App\Models\Post;
+            
+            $post = Post::find(1);
+            
+            $image = $post->image;
+        </pre>
+
+        <p class="description">
+            Ademas, puedes recuperar el "modelo padre" de la relacion polimorfica accediendo al nombre del metodo que llama 
+            a <span class="functions">morphOne</span> ( osea imageable en el modelo <span class="functions">Image</span> )
+        </p>
+        <pre class="code">
+
+            use App\Models\Image;
+ 
+            $image = Image::find(1);
+            
+            $imageable = $image->imageable;
+        </pre>
+        <p class="description">
+            en este caso <span class="functions">Imageable</span> nos va a retornar una instancia e User o una instancia de Post! 
+            todo depende del imageable_type
+        </p>
+        
+        <h3 class="sub--subtitule"><span id="hash">#</span> Convenciones de llaves </h2>
+        <p class="description">
+                si es necesario, puedes espesificar el nombre de las columnas "id" y el "type" ( como en imageable pero manualmente )
+                que seran utilizadas por la relacion polimorfica en el modelo hijo, si lo haces, debes ASEGURARTE que siempre pasaras en 
+                el primer argumento el nombre de la relacion en el metodo <span class="functions">morphTo</span>, como tip,
+                PUEDES USAR <span class="functions">__FUNCTION__</span>, esta sintaxis te dara elñ nombre de la funcion del conexto donde se llama!
+        </p>
+        <pre class="code">
+
+            /**
+            * Get the model that the image belongs to.
+            */
+            public function imageable(): MorphTo
+            {
+                return $this->morphTo(__FUNCTION__, 'imageable_type', 'imageable_id');
+            }
+        </pre>
+
+        <h2 class="subtitule"><span id="hash">#</span> One To Many ( Polimorfico ) </h2>
+        <p class="description">
+            una relacion one to manye polimorfica ( uno a muchos ) es similar que una tipica relacion uno a muchos, pero, el modelo "hijo"
+            ( osea la tabla central ) puede pertenecer a uno mas tipos de modelos ( no solo 2, puede pertenecer a 10 tipos si quiere )
+            y recuperar la instancia de cualquier modelo sin problemas
+        </p>
+        <p class="description">
+            Por ejemplo, imagina usuarios en tu aplicacion que pueden "comentar" videos y posts, osea:
+            un usuario puede comentar MUCHOS videos y el mismo usuario puede comentar MUCHOS posts. Usando relaciones polimorficas
+            puedes definir un simploe modelo de <span class="functions">comments</span> para contener los registros de los modelos
+            <span class="functions">Posts</span> y 
+            <span class="functions">videos</span>
+        </p>
+        <p class="description">
+            Examinemos la estructura de la tabla en una relacion one to many polimorfica
+        </p>
+        <pre class="code">
+            posts
+                id - integer
+                title - string
+                body - text
+            
+            videos
+                id - integer
+                title - string
+                url - string
+            
+            comments
+                id - integer
+                body - text
+                commentable_id - integer
+                commentable_type - string
+        </pre>
+        <h3 class="sub--subtitule"><span id="hash">#</span> Estructura del modelo </h3>
+        <p class="description">
+            Examinemos como deberia estar estructurado el modelo
+        </p>
+        <pre class="code">
+
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\MorphTo;
+ 
+            class Comment extends Model
+            {
+                /**
+                * Get the parent commentable model (post or video).
+                */
+                public function commentable(): MorphTo
+                {
+                    return $this->morphTo();
+                }
+            }
+            
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\MorphMany;
+            
+            class Post extends Model
+            {
+                /**
+                * Get all of the post's comments.
+                */
+                public function comments(): MorphMany
+                {
+                    return $this->morphMany(Comment::class, 'commentable');
+                }
+            }
+            
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\MorphMany;
+            
+            class Video extends Model
+            {
+                /**
+                * Get all of the video's comments.
+                */
+                public function comments(): MorphMany
+                {
+                    return $this->morphMany(Comment::class, 'commentable');
+                }
+            }
+        </pre>
+        <h3 class="sub--subtitule"><span id="hash">#</span> Recuperar la relacion </h3>
+        <p class="description">
+            Lo mismo! solo que ahora tendras una colleccion de modelos cuando recuperes la relacion polimorfica
+        </p>
+        <pre class="code">
+
+
+            //accediendo desde el padre
+            use App\Models\Post;
+ 
+            $post = Post::find(1);
+             
+            foreach ($post->comments as $comment) {
+                // ...
+            } 
+
+
+
+            //Accediendo desde el hijo
+            use App\Models\Comment;
+ 
+            $comment = Comment::find(1);
+            
+            $commentable = $comment->commentable;
+        </pre>
+        <p class="description">
+            La relacion <span class="functions"> commentable </span> del modelo <span class="function"> Comment </span> retornara ya sea
+            una instancia de <span class="functions">Post</span> o <span class="functions">Video</span> ( dependiendo lo almacenado en type )
+        </p>
+
+        <h2 class="subtitule"><span id="hash">#</span> One Of many ( Polimorfico )</h2>
+        <p class="description"> 
+            Algunas veces, un modelo puede tener muchos modelos relacionados, pero, quieres recuperar
+            facilmente el modelo "mas reciente" o "mas antiguo" de esa relacion.
+
+            Por ejemplo un modelod e usuario puede estar relacionado con muchos
+            modelos de imagen, pero quieres definir una manera conveniente
+            de interactuar con la imagen mas reciente un usuario ha
+            subido. puedes lograr esto usando una combinacion de
+            <span class="functions">morphOne</span> con los metodos <span class="functions">ofMany</span>
+        </p>
+        <pre class="code">
+
+            /**
+            * Get the user's most recent image.
+            */
+           public function latestImage(): MorphOne
+           {
+               return $this->morphOne(Image::class, 'imageable')->latestOfMany();
+           }
+
+
+
+
+
+
+            /**
+            * Get the user's most recent image.
+            */
+            public function latestImage(): MorphOne
+            {
+                return $this->morphOne(Image::class, 'imageable')->latestOfMany();
+            }
+        </pre>
+        <p class="description">
+            por defecto estos 2 metodos van a recuperar el ultimo o mas viejo modelo relacionado
+            basado en la primary key del modelo ( el cual debe poderse ordenar )
+        </p>
+        <p class="description">
+            Por ejemplo, usando el metodo <span class="functions">ofMany</span>
+            tu puedes recuperar la imagen con mas likes, ya que este metodo ( ofmany )
+            acepta la columna que se puede ordenar como primer argumento y una funcion agregada para determinar
+            el orden! ( <span class="functions">Max</span> <span class="fucntions">Min</span> )
+        </p>
+        <pre class="code">
+
+            /**
+            * Get the user's most popular image.
+            */
+            public function bestImage(): MorphOne
+            {
+                return $this->morphOne(Image::class, 'imageable')->ofMany('likes', 'max');
+            }
+        </pre>
+        <h2 class="subtitule"><span id="hash">#</span> Many To Many ( Polimorfico )</h2>
+        <p class="description">
+            las relaciones Many to Many polimorficas ( Mucho a muchos polimorficas ) son un poco mas complicadas
+            que una relacion "morph one". por ejemplo:
+
+            un modelo <span class="functions">Post</span> y un modelo <span class="functions">Video</span>
+            pueden compartir un relacion <span class="functions">Polimorfica</span> a un modelo llamado 
+            <span class="functions">Tag</span>.
+        </p>
+        <p class="description">
+            Usando una relacion many-to-many polimorfica en esta situacion va a permitir que tu aplicacion
+            tenga SOLO 1 tabla con tags unicos que seran acociados a sus respectivos modelos padre. 
+        </p>
+
+        <h3 class="sub--subtitule"><span id="hash">#</span> Estructura de la tabla </h3>
+        <pre class="code">
+
+            posts
+                id - integer
+                name - string
+            
+            videos
+                id - integer
+                name - string
+            
+            tags
+                id - integer
+                name - string
+            
+            taggables
+                tag_id - integer
+                taggable_id - integer
+                taggable_type - string
+        </pre>
+        <p class="description">
+            en este caso, nuestra tabla PIVOTE sera los taggeables, la cual conectara al
+            modelo A ( <span class="functions">posts</span> )
+            y el modelo B ( <span class="functions">videos</span> )
+
+            con la tabla D ( <span class="functions">tags</span> )
+            atravez de la tabla C ( <span class="functions">taggeables</span> )
+        </p>
+
+
+        <h3 class="sub--subtitule"><span id="hash">#</span> Estructuras de modelos </h3>
+        <p class="description">
+            Ahora estamos listos para definir la relacion entre los modelos...
+
+            en primer lugar los modelos <span class="functions">Post</span> y 
+            <span class="functions">Video</span> van a tener un metodo llamado tags el cual va a llamar
+            el metodo <span class="functions">morphToMany</span>
+        </p> 
+        <p class="functions">
+            el metodo <span class="functions">morphToMany</span> acepta el nombre del modelo
+            relacionado asi como el "nombre de la relacion". Basado en el nombre que asignemos a nuestra
+            tabla intermediaria y las llaves que contendra. en este caso
+            definiremos la relacion como <span class="functions">taggeable</span>
+        </p>
+        <pre class="code">
+
+            namespace App\Models;
+ 
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\MorphToMany;
+            
+            class Post extends Model
+            {
+                /**
+                * Get all of the tags for the post.
+                */
+                public function tags(): MorphToMany
+                {
+                    return $this->morphToMany(Tag::class, 'taggable');
+                }
+            }
+        </pre>
+        <p class="description">
+            Es como indicar.... este modelo posts se relaciona a la clase tag.
+            LARAVEL CREA en automatico una tabla intermediaria que se llamara taggeables
+            y esta tabla contendra las columnas
+            <span class="functions">tag_id</span>
+            <span class="functions"> taggable_id</span>
+            <span class="functions">taggable_type</span>
+
+            taggeable_id almacenara EL ID DE <span class="functions">Post</span> y t
+            taggeable_type almacenara el nombre de la clase del modelo 
+            ( osea, App\Models\Post ).
+
+            y esta estructura permite que MULTIPLES modelos 
+            ( no solo Post ) puedan tener tags, de ahi el termino POLIMORFICO.
+        </p>
+
+        <h3 class="sub--subtitule"><span id="hash">#</span> Definiendo la relacion inversa </h3>
+        <p class="description">
+            para definir la relacion inversa de un 
+            <span class="functions">morphedByMany</span>:
+
+            debes en el modelo <span class="functions">Tag</span> definir el metodo para CADA UNO DE SUS POSIBLES PADRES
+            relacionados ( osea, para cada modelo que va a poder meter un registro en la tabla intermedia llamada taggeable ).
+
+            en este ejemplo vamos a definir en tag un metodo para
+            <span class="functions">posts</span> y 
+            <span class="functions">videos</span>, ambos metodos DEBERAN RETORNAR
+            EL resultado del metodo <span class="functions">morphedMany</span>.
+        </p>
+
+        <p class="description">
+            ademas, el metodo 
+            <span class="functions"> acepta el nombre del modelo relacionado </span>
+            asi como el nombre de la relacion. ( igual que arriba )
+        </p>
+
+        <pre class="code">
+                    
+        namespace App\Models;
+        
+        use Illuminate\Database\Eloquent\Model;
+        use Illuminate\Database\Eloquent\Relations\MorphToMany;
+        
+        class Tag extends Model
+        {
+            /**
+            * Get all of the posts that are assigned this tag.
+            */
+            public function posts(): MorphToMany
+            {
+                return $this->morphedByMany(Post::class, 'taggable');
+            }
+        
+            /**
+            * Get all of the videos that are assigned this tag.
+            */
+            public function videos(): MorphToMany
+            {
+                return $this->morphedByMany(Video::class, 'taggable');
+            }
+        }
+        </pre>
+        
+        <h3 class="sub--subtitule"><span id="hash">#</span> Recuperando la relacion </h3>
+        <p class="description">
+            una vez definimos los modelos, ahora podemos recuperar las relaciones.
+            por ejemplo... para acceder a TODOS los tags para un POST puedes usar 
+            <span class="functions">tags</span>
+        </p>
+        <pre class="code">
+
+            use App\Models\Post;
+            
+            $post = Post::find(1);
+            
+            foreach ($post->tags as $tag) {
+                // ...
+            }
+        </pre>
+        <p class="description">
+            y ademas, puedes acceder alrrevez, osea, de 
+            <span class="functions">tags</span>
+             hacia <span class="functions">posts</span> o 
+             <span class="functions">videos</span>
+        </p>
+        <pre class="code">
+
+            use App\Models\Tag;
+ 
+            $tag = Tag::find(1);
+             
+            foreach ($tag->posts as $post) {
+                // ...
+            }
+             
+            foreach ($tag->videos as $video) {
+                // ...
+            }
+        </pre>
+        <h3 class="sub--subtitule"><span id="hash">#</span> Tipos personalizados de polimorficos </h3>
+        <p class="description">
+            por defecto, laravel va a usar el nombre del path del modelo para almacenarlo en la columna
+            type de la tabla intermedia.
+            osea, el type va a almacenar algo como 
+            <span class="functions">App\Models\Posts</span> para identificarA QUE MODELO
+            pertenece X registro y que laravel sepa comor recuperar su instancia.
+        </p>
+        <p class="description">
+            PERO talvez prefieras "desacoplar" estos valores de la estructura interna 
+            de tu aplicacion.
+        </p>
+        <p class="description">
+            Por ejemplo, en lugar de usar los nombres de los modelos como TYPE, podemos almacenar en la columna simplemente strings,
+             algo como <span class="functions">posts</span> o <span class="functions">Videos</span>
+
+        </p>
+        <pre class="code">
+
+            use Illuminate\Database\Eloquent\Relations\Relation;
+ 
+            Relation::enforceMorphMap([
+                'post' => 'App\Models\Post',
+                'video' => 'App\Models\Video',
+            ]);
+        </pre>
+        <p class="description">
+            Puedes llamar un metodo llamado 
+            <span class="functions">enforceMorphMap</span> que viene de la clase
+            <span class="functions">Relation</span> en el metodo
+            <span class="functions">boot</span> de la clase
+            <span class="functions">App\Providers\AppServiceProvider</span>
+
+        </p>
+        <p class="description">
+            por otra parte, puedes determinar el alias de un modelo dado en el "runetime"
+            ( osea cuando corres la aplicacion ) usando el metodo
+            <span class="functions">getMorphClass</span> y ademas, puedes el path completo relacionado
+            a la clase Morhp usando 
+            <span class="fucntions">Relation::getMorphedModel</span>
+        </p>
+        <pre class="code">
+
+            use Illuminate\Database\Eloquent\Relations\Relation;
+ 
+            $alias = $post->getMorphClass();
+            
+            $class = Relation::getMorphedModel($alias);
+        </pre>
+        <p class="description">
+            ADVERTENCIA, si deseas cambiar este comportamiento ( que ahora se usen alias en los types y no paths )
+            , deberas migrar todo a alias en tu database para que siga funcionando todo.
+        </p>
+        <h3 class="sub--subtitule"><span id="hash">#</span> Relaciones Dinamicas </h3>
+        <p class="description">
+            puedes usar el metodo
+            <span class="functions"> resolveRelationUsing </span>
+            para definir relaciones entre modelos de eloquent en tiempo de ejecucion. NO RECOMENDADO PARA APLICACIONES NORMALES, solo puede ser util en algunas ocaciones
+            al desarrollar paquetes de laravel.
+        </p>
+        <p class="description">
+            Aun asi epliquemos el metodo un poco.
+            <span class="functions"> resolveRelationUsing </span> acepta 
+            el nombre de la relacion deseada como primer argumento, el segundo argumento sera
+            va a ser un clousure el cual aceptara la instancia del modelo y retornara
+            una rdefinicion de relacion VALIDA. 
+
+            tipicamente configuraras las relaciones dinamicas en el boot de tu app ( en el AppServiceProvider )
+
+        </p>    
+        <pre class="code">
+
+            use App\Models\Order;
+            use App\Models\Customer;
+            
+            Order::resolveRelationUsing('customer', function (Order $orderModel) {
+                return $orderModel->belongsTo(Customer::class, 'customer_id');
+            });
+        </pre>
+        <p class="description">
+            En español?. 
+            En laravel las relaciones entre modelos de Eloquent son normalmente definidas de forma estatica
+            ( osea, de forma explicita debes de definir que X modelo se relaciona a Y de forma de hasMany por ejemplo ).
+            PERO, algunas veces PUEDE ser util definir relaciones de manera DINAMICA 
+            ( osea en tiempo de ejecucion en lugar de forma explicita en el codigo ).
+            esto es util cuando desarrollas algunos tipos de paquetes o cuando necesitas configuraciones flexibles.
+
+            el metodo <span class="functions">resolveRelationUsing </span> te permite hacer esto.
+        </p>
+        <p class="description">
+            Como ejemplo: imagina que tienes el MODELO <span class="functions">User</span>
+            y tu quieres definir la relacion de forma DINAMICA basada en ciertos criterios.
+        </p>
+
+        <pre class="code">
+
+            class DynamicRelationshipServiceProvider extends ServiceProvider
+            {
+                public function boot()
+                {
+                    User::resolveRelationUsing('dynamicPosts', function ($user) {
+                        // Lógica para definir dinámicamente la relación
+                        if ($user->isAdmin()) {
+                            return $user->hasMany(Post::class, 'admin_id');
+                        } else {
+                            return $user->hasMany(Post::class, 'user_id');
+                        }
+                    });
+                }
+            }
+        </pre>
+        <p class="description">
+            En este ejemplo se define una relacion llamada <span class="functions">dynamicPosts</span>
+            la cual DEPENDE de si un usuario es administrado o no, el clousure
+            verifica si EL USUARIO es admin utilizando el metodo isAdmin() y devuelve una relacion hasMany.
+
+            OSEA, esto es util cuando deseas darle a x modelos relaciones en base a X evento, si es administrador definele esta relacion, si es un usuario normal,
+            definele esta relacion.
+
+            Esto es útil en situaciones donde deseas
+             modularizar y personalizar el comportamiento
+            de tu aplicación según diferentes escenarios
+            o roles de usuario. Por ejemplo
+        </p>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"><span id="hash">#</span> Haciendo Queries en relaciones </h2>
+        <p class="description">
+            Como todas las relaciones de eloquent estan
+             definidas via metodos, tu puedes
+            llamar esos metodos para obtener una INSTANCIA
+             de la relacion SIN EJECUTAR realmente una consulta para cargar los modelos
+             relacionados.
+
+             ADEMAS cualqueir relacion de eloquent tambien sirven como un query BUILDER, lo cual te permite
+             seguir concatenando reglas en la relacion antes de finalmente EJECUTAR LA QUERY CONTRA LA BASE DE DATOS.
+        </p>
+        <p class="description">
+            como ejemplo, imagina que tienes una aplicacion de blog.
+            un Modelo <span class="functions">User</span> tiene MUCHOS ( one to many ) 
+            <span class="functions">Posts</span> Asociados.
+        </p>
+
+        <pre class="code">
+
+            class User extends Model
+            {
+                /**
+                * Get all of the posts for the user.
+                */
+                public function posts(): HasMany
+                {
+                    return $this->hasMany(Post::class);
+                }
+            }
+        </pre>
+
+        <p class="description">
+            esto te permite concatenar mas metodos al llamar a la relacion ( porque no se a ejecutado con un
+            <span class="functions">get</span>,
+            <span class="functions">find</span>,
+            <span class="functions">all</span>,
+            <span class="functions">first</span>,
+            etc
+            )
+        </p>
+        <pre class="code">
+
+            use App\Models\User;
+ 
+            $user = User::find(1);
+            
+            $user->posts()->where('active', 1)->get();
+        </pre>
+        <p class="description">
+            Eres libre de usar cualquier metodo de query Builder ( hay un capitulo extenso de esto )
+        </p>        
+        <h3 class="subtitule"><span id="hash">#</span> Encadenando el metodo <span class="functions">orWhere</span> despues de las relafiones  </h3>
+
+        <p class="functions">
+            Como se demostro antes, eres libre de añadir las reglas que quieras a la relacion
+            Cuando la estas "queriando", sin embargo, TEN CUIDADO al usar el metod
+            <span class="functions">orWhere</span> sobre una relacion.
+            esta clausula va a ser LOGICAMENTE AGRUPADA en el mismo nivel 
+            de las reglas de los constraints
+        
+        </p>
+        <p class="description">
+            Ejemplo:
+        </p>
+        <pre class="code">
+
+            $user->posts()
+                ->where('active', 1)
+                ->orWhere('votes', '>=', 100)
+                ->get();
+        </pre>
+        <p class="description">
+            este ejemplo de arriba va a generar la siguiente consulta de SQL
+        </p>
+        <pre class="code">
+
+            select *
+            from posts
+            where user_id = ? and active = 1 or votes >= 100
+        </pre>
+        <p class="description">
+            Aqui estas diciendo: devuelveme TODOS los 
+            usuarios donde la columna "active" sea
+            igual a 1, o , donde su columna votes sea 
+            MAYOR O IGUAL a 100
+        </p>
+        <p class="description">
+            En algunas situaciones, te va a combenir usar "LOGICAL GROUPS" ( Grupos logicos )
+            en los cuales agrupar las logicas
+        </p>
+        <pre class="code">
+
+            use Illuminate\Database\Eloquent\Builder;
+ 
+            $user->posts()
+                    ->where(function (Builder $query) {
+                        return $query->where('active', 1)
+                                    ->orWhere('votes', '>=', 100);
+                    })
+                    ->get();
+        </pre>
+        <p class="description">
+            si usas esto generaras esta consulta SQL
+        </p>
+        <pre class="code">
+
+            select *
+            from posts
+            where user_id = ? and (active = 1 or votes >= 100)
+        </pre>
+
+        <h3 class="subtitule"><span id="hash">#</span> Diferencias entre ambas consultas </h3>
+        <p class="description">
+            Agregar un parentesis, cambia ligeramente la consulta!
+
+            <ul class="u-list">
+                <li>
+                    <span class="functions">con parentesis</span>:
+                    estas seleccionando TODAS las columnas de la tabla posts
+                    donde la columna user_id sea igual a "N" ( lo que sea ) 
+                    Y <span class="functions">Active = 1 O ( si cualquiera de las dos da true lo trae )
+                        Votes >= 100
+                    </span>
+                    Los parentesis AGRUPAN las 2 condiciones asegurando que almenos una de ellas debe ser verdadera
+                    para que se cumpla la condicion global.
+                </li>
+                <li>
+                    <span class="functions">sin parentesis</span>:
+                    la diferencia esque aqui el user_id lo evaluas AL MISMO NIVEL que active y votes, osea
+                    estas diciendo: traeme todo si el usuario es N  y esta activado O si tiene votos
+
+                </li>
+            </ul>
+        </p>
+        <p class="description">
+            OSEA:
+        </p>
+        <pre class="code">
+
+            //Esto devuelve TODOS los registros que cumplan ALMENOS una de las siguientes condiciones logicas
+            // que user_id sea igual a 786 y este activo (1 )
+            // O bien, el registro tenga más de 100 votos, independientemente del valor de 'user_id' y 'active'.
+            select *
+            from posts
+            where user_id = 786 and active = 1 or votes >= 100
+        
+        
+            //Selecciona todos los registros de la tabla posts donde user_id sea igual a 87
+            // Y ademas que este user_id ese ACTIVOA (1) o tenga mas de 100 votos
+            //osea, el usuario 87 se recuperara seimpre y cuando este activo o tenga mas de 100 votos 
+            //( si no esta activo y tiene 500 votos lo traera, si esta activo y tiene 6 votos, lo traera )
+            select *
+            from posts
+            where user_id = 87 and (active = 1 or votes >= 100)
+
+        </pre>
+        <p class="description">
+            Como ves, sin <span class="functions">agrupadores logicos</span> la consulta
+            cambia mucho en significado ya que en 1 caso te trae usuarios con ID y ademas los que tengan mas de 100 votos, en otro
+            SOLO el user_id que cumpla alguna de las 2 condiciones!
+        </p>
+       
+        
+        
+        <h3 class="subtitule"><span id="hash">#</span> Metodos de relacion VS propiedades dinamicas </h3>
+        <p class="description">
+            SI NO NECESITAS agregar reglas a la query, puedes acceder a la relacion COMO SI FUERA UNA
+            PROPIEDAD, ( si necesitas concatenar reglas necesitaras si o si usar la sintaxis de funcion )
+
+        </p>
+        <pre class="code">
+
+            $user = User::find(1);
+ 
+            foreach ($user->posts as $post) {
+                // ...
+            }
+        </pre>
+        <p class="description">
+            Las relaciones dinamicas realizan una "lazy loading" ( carga peresoza de relaciones  )
+            , esto significa, que solo se CARGARA la relacion de la data cuando accedas
+            a ella.
+
+            debido a esto algunos desarrolladores, regularmente usan el concepto de 
+            <span class="functions">eager loading</span> para PRE CARGAR las relaciones que ellos
+            saben que van a usar antes de cargar el modelo. ( pre cargan el modelo con las relaciones que ocuparan
+            en vez de cargar modelo y luego relacion ).
+        </p>
+        <p class="description">
+            Eager loading te da la ventaja de una
+            <span class="functions">REDUCCION SIGNIFICATIVA</span>
+            en las consultas SQL que deben ejecutarse para cargar las relaciones del
+            modelo.
+
+            ( HAY UN TEMA COMPLETO de esto, lo podemos ver despues  )
+        </p>
+        <h3 class="subtitule"><span id="hash">#</span> Consultando la exictencia de relaciones  </h3>
+        <p class="description">
+            Cuando recuperas modelos, vas a querer limitar tus resultados BASADOS en la existencia de una relacion
+
+            Por ejemplo: Imagina que quieres resuperar TODOS los blogs posts que tienes almenos 1 comentario
+             nota que, posts es un modelo y comments otro modelo, los cuales estan relacionados
+        </p>
+        <pre class="code">
+
+            use App\Models\Post;
+ 
+            // Retrieve all posts that have at least one comment...
+            $posts = Post::has('comments')->get();
+        </pre>
+        <p class="description">
+            osea, estas indicando, "Trae todos los POSTS que almenos tengan en su relacion con
+            Comments 1 registro"
+        </p>
+        <p class="description">
+            Como extra puedes agregar condiciones a los metodos
+            <span class="functions">has</span> y
+            <span class="functions">orHas</span>
+        </p>
+        <pre class="code">
+
+            // Retrieve all posts that have three or more comments...
+            $posts = Post::has('comments', '>=', 3)->get();
+        </pre>
+
+        <p class="description">
+            Una nota extra, los metodos <span class="functions">has</span>
+            pueden ser construidos con la notacion "dot" ( osea un punto literalmente '.')
+            , por ejemplo, si quieres recuperar todos los posts que tienen al menos
+            1 COEMNTARIO que asu vez tiene 1 IMAGEN
+        </p>
+        <pre class="code">
+            // Retrieve posts that have at least one comment with images...
+            $posts = Post::has('comments.images')->get();
+        </pre>
+        <p class="description">
+            Solo los comentarios que tienen 1 comentario con imagen ( hablandod e modelos y relaciones ), se 
+            traeran.
+        </p>
+        <p class="description|">
+            Si ocupas MAS PODER PUEDES usar los metodo 
+            <span class="function">whereHas</span> y 
+            <span class="function">orWhereHas</span> para definir reglas de query adicionales en tus
+            <span class="functions">has</span> queries, asi como inspeccionar el contenidod e la relacion
+        </p>
+        <pre class="code">
+
+            // Retrieve posts with at least one comment containing words like code%...
+            $posts = Post::whereHas('comments', function (Builder $query) {
+                $query->where('content', 'like', 'code%');
+            })->get();
+            
+            // Retrieve posts with at least ten comments containing words like code%...
+            $posts = Post::whereHas('comments', function (Builder $query) {
+                $query->where('content', 'like', 'code%');
+            }, '>=', 10)->get();
+        </pre>
+        <p class="description">
+            Como ves, puedes hacer consultas muy poderosas!, pero, ELOQUENT ACTUALMENTE NO soporta
+            hacer esto con operaciones entre DATABASES , las relacxiones deben existir en la misma database
+        </p>
+        <h3 class="subtitule"><span id="hash">#</span> Queries de existencia de relaciones en linea  </h3>
+        <p class="description">
+            Si deseas consultar la existencia de una
+             relación con una única condición where
+            adjunta a la consulta de la relación, 
+            podrías encontrar más conveniente utilizar 
+            los métodos.
+
+            <span class="functions">whereRelation</span>
+            <span class="functions">orWhereRelation</span>
+            <span class="functions">whereMorphRelation</span>
+            <span class="functions">orWhereMorphRelation</span>
+        </p>
+        <pre class="code">
+
+            use App\Models\Post;
+ 
+            $posts = Post::whereRelation('comments', 'is_approved', false)->get();
+
+
+            $posts = Post::whereRelation(
+                'comments', 'created_at', '>=', now()->subHour()
+            )->get();
+        </pre>
+
+        <h3 class="subtitule"><span id="hash">#</span> Haciendo query en AUSENCIA de relaciones.</h3>
+        <p class="description">
+            Cuando recuperes registros de relaciones, talvez quieras aplicar
+            filtros inversos ( osea de ausencia de datos en la relacion ),
+
+            para esto ocuparemos los metodos 
+            <span class="functions">doesntHave</span> y 
+            <span class="functions">orDoesntHave</span>
+        </p>
+        <pre class="code">
+
+            use App\Models\Post;
+ 
+            $posts = Post::doesntHave('comments')->get();
+        </pre>
+        <p class="description">
+            y para mas poder tienes:
+            <span class="functions">WhereDoesntHave</span> y  
+            <span class="functions">orWhereDoesntHave</span>  
+
+        </p>
+        <pre class="code">
+
+            use Illuminate\Database\Eloquent\Builder;
+ 
+            $posts = Post::whereDoesntHave('comments', function (Builder $query) {
+                $query->where('content', 'like', 'code%');
+            })->get();
+        </pre>
+        <p class="description">
+            Igualmente, puedes utilizar la sintaxis dot 
+            para acceder a X relacion o relaciones y
+             evaluar campos:
+        </p>
+        <pre class="code">
+
+            $posts = Post::whereDoesntHave('comments.author', function (Builder $query) {
+                $query->where('banned', 0);
+            })->get();
+        </pre>
+        <p class="description">
+            Osea, estas trayendo todos los post que no tengan registros en la relacion
+            comments.author, ademas, estas indicando que si si tiene registros, traiga solo
+            los que banned sea 0 de AUTHOR
+        </p>
+        <h3 class="subtitule"><span id="hash">#</span> Queries MORPH a relaciones </h3>
+        <p class="description">
+            para consultar la existencia de <span class="functions">Relaciones Morph</span> ( Polimorficas )
+            puedes usar 
+            <span class="functions">whereHasMorph</span>
+            <span class="functions">whereDoesntHaveMorph</span>
+        </p>
+        <p class="functions">
+            Estos metodos, aceptan el nombre de la relacion como primer argumento, despues, los metodos
+            aceptan los nombres de los MODELOS RELACIONADOS que quieres incluir en la consulta.
+            , finalmente puedes añadir un clousure que personaliza la consulta de relacion.
+        </p>
+        <pre class="code">
+
+            use App\Models\Comment;
+            use App\Models\Post;
+            use App\Models\Video;
+            use Illuminate\Database\Eloquent\Builder;
+            
+            // Retrieve comments associated to posts or videos with a title like code%...
+            $comments = Comment::whereHasMorph(
+                'commentable',
+                [Post::class, Video::class],
+                function (Builder $query) {
+                    $query->where('title', 'like', 'code%');
+                }
+            )->get();
+            
+            // Retrieve comments associated to posts with a title not like code%...
+            $comments = Comment::whereDoesntHaveMorph(
+                'commentable',
+                Post::class,
+                function (Builder $query) {
+                    $query->where('title', 'like', 'code%');
+                }
+            )->get();
+        </pre>
+        <p class="description">
+            De esta manera estas recuperando SOLO la informacion de los
+             modelos padres que necesitas, 
+             <span class="functions">commentable</span> es la tabla intermedia 
+             que laravel crea en automatico para relaciones POLIMORFICAS
+
+        </p>
+        <p class="descriptions">
+            Ademas, puedes tambien hacer reglas de consulta basados en el 
+            <span class="functions">$Type</span> del modelo relacionado.
+            , la clousure pasada al metodo
+            <span class="functions">whereHasMorph</span> puede recibir
+            un segundoa rgumento donde espesificaras el tipo
+        </p>
+        <pre class="code">
+
+            use Illuminate\Database\Eloquent\Builder;
+ 
+            $comments = Comment::whereHasMorph(
+                'commentable',
+                [Post::class, Video::class],
+                function (Builder $query, string $type) {
+                    $column = $type === Post::class ? 'content' : 'title';
+             
+                    $query->where($column, 'like', 'code%');
+                }
+            )->get();
+        </pre>
+        <p class="description">
+            Como ves, aqui estas definiendo la columna DEPENDIENDO el type que venga!
+            dependiendo eso se hace la busquda
+        </p>
+        <h3 class="subtitule"><span id="hash">#</span>Consultando TODOS los modelos relacionados. </h3>
+        <p class="code">
+            en lugar de mandar un array de posibles modelos polimorficos
+            tu puedes proveer un <span class="functions">*</span>
+            como un valor de comodin, esto indicara a laravel que RECUPERE
+            TODOS LOS POSIBLES TYPES POLIMORFICOS DE LA DATABASE.
+        </p>
+        <pre class="code">
+
+            use Illuminate\Database\Eloquent\Builder;
+ 
+            $comments = Comment::whereHasMorph('commentable', '*', function (Builder $query) {
+                $query->where('title', 'like', 'foo%');
+            })->get();
+        </pre>
+    </section>
+    
+
+    <section class="section">
+        <h2 class="subtitule"><span id="hash">#</span> Agregados en modelos relacionados </h2>
+        <h3 class="subtitule"><span id="hash">#</span> Contando modelos relacionados </h3>
+        <p class="description">
+            Si quieres saber el conteo de registros que trae una relacion SIN RECUPERAR LAS INSTANCIAS DE LOS MODELOS
+            PUEDES USAR LA FUNCION <span class="functions">withCount</span>
+            
+        </p>
+        <pre class="code">
+            
+            use App\Models\Post;
+            
+            $posts = Post::withCount('comments')->get();
+            
+            foreach ($posts as $post) {
+                echo $post->comments_count;
+            }
+        </pre>
+        <p class="functions">
+            aqui, ESTAS trayendo el conteo de comentarios de
+            TODOS los posts existentes ( contando la relacion ), el metodo
+            <span class="functions">withCount</span> agrega una propiedad extra
+            a cada post llamada {relation}_count ( dependiendo la relacion es el nombre ).
+        </p>
+        <p class="description">
+            Ademas, si le pasas un array al metodo withCount, puedes hacer conteo de 
+            VARIAS RELACIONES ASI COMO TAMBIEN MAS REGLAS ( constraints ) a la query
+        </p>
+        <pre class="code">
+            
+            use Illuminate\Database\Eloquent\Builder;
+            
+            $posts = Post::withCount(['votes', 'comments' => function (Builder $query) {
+                $query->where('content', 'like', 'code%');
+            }])->get();
+            
+            echo $posts[0]->votes_count;
+            echo $posts[0]->comments_count;
+        </pre>
+        <p class="functions">
+            INCLUSO puedes ponerle alias al resultado 
+            del conteo de las relaciones ( osea al nombre de la propiedad que el metodo
+            crea en el modelo ) 
+        </p>
+        <pre class="code">
+            
+            use Illuminate\Database\Eloquent\Builder;
+            
+            $posts = Post::withCount([
+            'comments',
+            'comments as pending_comments_count' => function (Builder $query) {
+                $query->where('approved', false);
+            },
+            ])->get();
+            
+            echo $posts[0]->comments_count;
+            echo $posts[0]->pending_comments_count;
+        </pre>
+        
+        <h3 class="subtitule"><span id="hash">#</span> Deferred Count Loading </h3>
+        <p class="description">
+            Puedes hacer cargas de CONTEOS una vez el modelo padre dea recuperado.
+            usando <span class="functions">loadCount</span>
+        </p>
+        <pre class="code">
+            $book = Book::first();
+            
+            $book->loadCount('genres');
+        </pre>
+        <p class="description">
+            si necesitas setear mas constraints en la query puedes mandar un array epesificando
+            la relacion que deseas cargar.
+        </p>
+        <pre class="code">
+            
+            $book->loadCount(['reviews' => function (Builder $query) {
+                $query->where('rating', 5);
+            }])
+        </pre>
+        <h3 class="subtitule"><span id="hash">#</span> Conteo de relaciones y selects personalizados </h3>
+        
+        <p class="description">
+            si estas combinando el metodo <span class="functions">withCount</span>
+            y el metodo <span class="functions">select</span>, solo asegurate de que llamas primero al select
+        </p>
+        <pre class="code">
+            
+            $posts = Post::select(['title', 'body'])
+            ->withCount('comments')
+            ->get();
+        </pre>
+        <p class="description">
+            tienes mas metodos de agregados a utilizar:
+            
+            <span class="functions">withMax</span>, 
+            <span class="functions">withMin</span>, 
+            <span class="functions">withAvg</span>, 
+            <span class="functions">withSum</span>, 
+            <span class="functions">withExists</span>
+            
+            estos metodos formaran la propiedad {relation}_{function}_{column}
+            
+            , si no te agrada la nomenglatura añade alias
+        </p>
+        <pre class="code">
+            
+            $posts = Post::withSum('comments as total_comments', 'votes')->get();
+            
+            foreach ($posts as $post) {
+                echo $post->total_comments;
+            }
+        </pre>
+        <pre class="code">
+            
+            //deferred Method
+            $post = Post::first();
+            
+            $post->loadSum('comments', 'votes');
+        </pre>
+        <p class="description">
+            select antes de los metodos de agregado... recuerda
+        </p>
+        <pre class="description">
+            
+            $posts = Post::select(['title', 'body'])
+            ->withExists('comments')
+            ->get();
+        </pre>
+        
+        <h3 class="subtitule"><span id="hash">#</span> Contando modelos relacionados en relaciones Polimorficas ( Morph ) </h3>
+        <p class="description">
+            si quieres precargar ( eager load ) una relacion polimorfica ( morph to )
+            asi como tambien el conteto de los modelos relacionados de varios modelos que deberia obtener la relacion
+            entonces...puedes utilizar el metodo
+            <span class="function">with</span>  en combinacion
+            con el metodo <span class="functions">morphTo</span>
+            dando <span class="functions">morphWithCount</span>
+        </p>
+        <p class="description">
+            Hagamos un ejemplo: imagina que tienes el modelo 
+            <span class="functions">Post</span> y el modelo 
+            <span class="functions">Photo</span>, y estos modelos ( ambos )
+            van a crear resgistros en el modelo <span class="function">ActivityFeed</span>
+        </p>
+        <p class="description">
+            vamos a asumir que el modelo 
+            <span class="functions">ActivityFeed</span> define una relacion polimorfica
+            morphTo llamada parentable() que nos permite recuperar al modelo padre
+            <span class="functions">Photo</span> y 
+            <span class="functions">Post</span>
+            depen diendo el type en una instancia de 
+            <span class="functions">ActivityFeed</span>
+
+        </p>
+        <p class="description">
+            Como extra imagina que los modelos <span class="functions">Photo</span>
+            tienen muchos <span class="functions">Tags</span> y el modelo <span class="functions">Posts</span>
+            tienen muchos <span class="functions">Comentarios</span>
+        </p>
+        <p class="description">
+            Ahora imagina que quieres recuperar una instancia de 
+            <span class="functions">parentable</span> y hacer eagle load en su
+            parentable models de cada activityFeed ( osea aplicar eagle load en cada modelo padre )
+
+            Adicionalmente quieres el numero de tags que estan asociados en las FOTOS ( Photo ) y el numero
+            de comentarios asociados en cada POST 
+        </p>
+        <pre class="description">
+ 
+            $activities = ActivityFeed::with([
+            'parentable' => function (MorphTo $morphTo) {
+                $morphTo->morphWithCount([
+                    Photo::class => ['tags'],
+                    Post::class => ['comments'],
+                ]);
+            }])->get();
+        </pre>
+        
+        <p class="description">
+            Ademas, puedes lograr con el metodo 
+            <span class="functions">loadMorphCount</span> traer los CONTEOS de varios
+            modelos padre asociados con el modelo <span class="functions">ActivityFeed</span>
+        </p>
+        <pre class="code">
+
+            $activities = ActivityFeed::with('parentable')->get();
+ 
+            $activities->loadMorphCount('parentable', [
+                Photo::class => ['tags'],
+                Post::class => ['comments'],
+            ]);
+        </pre>
+        
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"><span id="hash">#</span> Eager Loading </h2>
+        <p class="description">
+            Cuando accedes a las relaciones de Eloquent como propiedades, los modelos
+            relacionados se cargan de forma "Perezosa" ( Lazy loading )
+            
+            cargar como lazy loading un modelo se refiere a que los datos de la relacion NO SE CARGAN hasta que
+            accedes a la propiedad por primera vez.
+        </p>
+        <p class="description">
+            Sin embargo, en eloquent puedes hacer una carga del modelo de forma ansiosa
+            ( osea un Eager Loading , se traduce como "carga ansiosa") en el momento
+            de las relaciones en el momento en que consultas el modelo principal, hacer esto arregla el problema
+            de N + 1
+        </p>
+        <p class="description">
+            "Lazy loading" (carga perezosa): Es una 
+            técnica de optimización donde se retrasa la
+             carga de un objeto hasta el momento en
+            que se necesita.
+        </p>
+        <p class="description">
+            "Eager loading" (carga ansiosa): Es lo opuesto a
+             lazy loading. Los datos relacionados se cargan
+              de antemano, junto con el modelo principal. 
+        </p>
+        <p class="description">
+            "N + 1 query problem" 
+            (problema de consulta N + 1):
+             Es un problema de rendimiento común 
+            en bases de datos donde se realiza una 
+            consulta para recuperar un conjunto de 
+            registros, y luego se realiza una 
+            consulta adicional por cada registro 
+            para obtener datos relacionados.
+        </p>
+        <h3 class="subtitule"><span id="hash">#</span> Probelma de N + 1 </h3>
+        <p class="description">
+            Para ilustrar el problema de N + 1 pondremos un ejemplo:
+
+            tenemos el modelo <span class="functions">Book</span> que pertenece a un modelo
+            <span class="functions">Author</span>.
+        </p>
+
+        <pre class="code">
+
+            namespace App\Models;
+ 
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\BelongsTo;
+            
+            class Book extends Model
+            {
+                /**
+                * Get the author that wrote the book.
+                */
+                public function author(): BelongsTo
+                {
+                    return $this->belongsTo(Author::class);
+                }
+            }
+        </pre>
+
+        <p class="description">
+            Ahora recuperemos TODOS los libros y su author
+        </p>
+        <pre class="code">
+            
+            use App\Models\Book;
+            
+            $books = Book::all();
+            
+            foreach ($books as $book) {
+                echo $book->author->name;
+            }
+        </pre>
+
+        <p class="description">
+            ¿problema?. 
+
+            este codigo de arriba ejecutara 1 consulta sql para traerte
+            todos los libros del modelo <span class="functions">Books</span>,
+
+            luego, va a ejecutar una consulta SQL por cada iteracion de $books, osea, si tienes 30 registros
+            en tu modelo <span class="functions">Book</span>, ejecutarias 30 consultas contra
+            la base de datos. DANDO UN TOTAL DE 31 CONSULTAS.
+        </p>
+        <p class="description">
+            Estas son demasiadas CONSULTAS, pero, con 
+            <span class="functions">eager loading</span> 
+            podemos reducir la cantidad de consultas solo a 2 queries!
+
+        </p>
+        <p class="description">
+            Para lograr esto solo debes de agregar el metodo <span class="functions">with</span> cuando recuperes la collection!
+
+            asi estaras indicando que se haga la query junto a la carga de relaciones
+        </p>
+        <pre class="code">
+
+            $books = Book::with('author')->get();
+            
+            foreach ($books as $book) {
+                echo $book->author->name;
+            }
+        </pre>
+
+        <p class="description">
+            Lo de arriba solo ejecutara 2 queries,  serian las siguientes:
+            <ul class="u-list">
+                <li>
+                    1.- una consulta para recuperar TODOS los libros 
+                </li>
+                <li>
+                    2.- una consulta para recuperar TODOS los authores de todos los libros 
+                </li>
+            </ul>
+        </p>
+
+        <h3 class="subtitule"><span id="hash">#</span>  Eager Laoding en multiples relaciones </h3>
+        
+        <p class="description">
+            algunas veces ocuparas hacer "cargas ansiosas"
+            ( eager loading ) diferentes relaciones, para hacerlo, pasa un array con las relaciones
+            que deben ser cargadas de forma ansiosa.
+        </p>
+        <pre class="code">
+            
+            $books = Book::with(['author', 'publisher'])->get();
+        </pre>
+        
+        <h3 class="subtitule"><span id="hash">#</span> Carga ansiosa/anidada anticipada </h3>
+        <p class="description">
+            puedes hacer eagle loading de relaciones de relaciones, para esto solo debes usar la dotacion
+            dot
+        </p>
+        <pre class="code">
+            
+            $books = Book::with('author.contacts')->get();
+            
+            foreach ($books as $book) {
+                echo $book->title;
+                echo $book->author->name;        // No genera consulta adicional (eager loaded)
+                echo $book->author->contacts;    // No genera consulta adicional (eager loaded)
+                echo $book->publisher->name;     // Genera una consulta adicional (lazy loaded)
+                echo $book->reviews->count();    // Genera una consulta adicional (lazy loaded)
+            }        
+        </pre>
+        <p class="description">
+            Por otra parte, puedes espesificar las cargas de
+            relaciones eagle loading anidadas usando un array en el metodo
+            <span class="functions">with</span>
+        </p>
+        <pre class="code">
+            
+            $books = Book::with([
+            'author' => [
+            'contacts',
+            'publisher',
+            ],
+            ])->get();
+        </pre>
+
+        
+        <h3 class="sub--subtitule"><span id="hash">#</span> Cargas anidadas eagel loading en relaciones polimorficas ( <span class="functions">morphTo</span> )  </h3>
+        <p class="description">
+            si quieres aplicar eagle Loading a una relacion <span class="functions">morphTo</span>
+            al igual que a sus relaciones anidadas en las multiples entidades que se retornen
+            debes usar <span class="functions">with</span> en combinacion con
+            <span class="functions">morpWith</span>
+        </p>
+        <p class="description">
+            Para ilsutrar esto usaremos este ejemplo de modelo:
+        </p>
+        <pre class="code">
+            
+            ?php
+            
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\MorphTo;
+            
+            class ActivityFeed extends Model
+            {
+                /**
+                * Get the parent of the activity feed record.
+                */
+                public function parentable(): MorphTo
+                {
+                    return $this->morphTo();
+                }
+            }
+        </pre>
+        <p class="description">
+            En este ejemplo tendremos los siuientes modelos
+            <span class="functions">Event</span>, 
+            <span class="functions">Photo</span> y
+            <span class="functions">Posts</span> pueden crear registros en
+            <span class="functions">ActivityFeed</span>
+            
+        </p>
+        <p class="description">
+            Ademas, asumiremos que el modelo <span class="function">Event</span>
+            pertenece a un modelo <span class="function">Calendar</span> y el modelo
+            <span class="functions">Photo</span> esta asociado  con el modelos
+            <span class="functions">Tag</span>, y ademas, el modelos
+            <span class="functions">Post</span> pertenece a un <span class="functions">Author</span>
+            
+            Con estas relaciones definidas podemos recuperar registros de 
+            <span class="functions">ActivityFeed</span> y aplicar eagle load a TODOS
+            los modelos padres
+        </p>
+        <pre class="code">
+            
+            $activities = ActivityFeed::query()
+            ->with(['parentable' => function (MorphTo $morphTo) {
+                $morphTo->morphWith([
+                Event::class => ['calendar'],
+                Photo::class => ['tags'],
+                Post::class => ['author'],
+                ]);
+            }])->get();
+        </pre>
+        <h3 class="sub--subtitule"><span id="hash">#</span>  Aplicar Eagel Loading en columnas espesificas  </h3>
+        
+        <p class="description">
+            no siempre ocuparas TODAS las columnas de la relacion que estas recuperando, por esto,
+            eloquent te permite espesificar que columnas de la relacion te gustaria recuperar con eagle loading.
+        </p>
+        <pre class="code">
+            
+            $books = Book::with('author:id,name,book_id')->get();
+        </pre>
+        <p class="description">
+            Cuando uses esta funcionalidad, siempre debes incluir la columna id y cualquier columna de
+            llave foranea RELEVANTE en la lista de columnas a recuperar.
+            
+        </p>
+        <h3 class="sub--subtitule"><span id="hash">#</span>Aplicar Eager loading por default a nivel del MODELO</h3>
+        <p class="description">
+            Si quieres que todas las consultas de X modelo traigan la relacion en sus querys ya pre cargada
+            ( eager loading ), puedes definir la propiedad.
+            <span class="functions">with</span> en el modelo.
+        </p>
+        <pre class="code">
+ 
+            namespace App\Models;
+            
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\BelongsTo;
+            
+            class Book extends Model
+            {
+                /**
+                * The relationships that should always be loaded.
+                *
+                * @var array
+                */
+                protected $with = ['author'];
+            
+                /**
+                * Get the author that wrote the book.
+                */
+                public function author(): BelongsTo
+                {
+                    return $this->belongsTo(Author::class);
+                }
+            
+                /**
+                * Get the genre of the book.
+                */
+                public function genre(): BelongsTo
+                {
+                    return $this->belongsTo(Genre::class);
+                }
+            }
+        </pre>
+        <p class="description">
+            Si te gustaria hacer una query pero omitiendo lo
+             que definiste en la propiedad 
+            <span class="functions">with</span> puedes usar al hacer la query el metodo
+            <span class="functions">withOnly</span> para indicar que relaciones nuevas vas a pre cargar, o
+            puedes usar <span class="functions">without</span> para decir que relaciones NO VAS
+            a precargar.
+        </p>
+        <pre class="code">
+
+            $books = Book::without('author')->get();
+
+            $books = Book::withOnly('genre')->get();
+        </pre>
+
+        <h3 class="sub--subtitule"><span id="hash">#</span> Aplicando constraints en EAGER lOADS </h3>
+        <p class="description">
+            PUEDES LOGRAR ESTO FACILMENTE ( APLICAR REGLAS EXTRAS CUANDO pre cargas una relacion
+            con eager load ) usando el metodo <span class="functions"> with </span>, y pasandole
+            como primer argumento la relacion y segundo un clousure que indicara las Constraints.
+        </p>
+
+        <pre class="code">
+
+            use App\Models\User;
+            use Illuminate\Contracts\Database\Eloquent\Builder;
+            
+            $users = User::with(['posts' => function (Builder $query) {
+                $query->where('title', 'like', '%code%');
+            }])->get();
+        </pre>
+        <p class="description">
+
+            En este ejemplo eloquent va a solo a cargar como eagle load post donde el 
+            titulo comntenga la palabra CODE, ademas, puedes llamar otros Metodos
+            de query builder
+
+    
+        </p>
+        <pre class="code">
+
+            $users = User::with(['posts' => function (Builder $query) {
+                $query->orderBy('created_at', 'desc');
+            }])->get();
+        </pre>
+
+        <h3 class="sub--subtitule"><span id="hash">#</span> Aplicando reglas a un Eager Loading de una relacion morphTo ( polimorfica ) </h3>
+        <p class="description">
+            puedes determinar que reglas aplican a cada MODELO PADRE cuando hacer una relacion polimorfica
+        </p>
+        <pre class="code">
+            
+             
+            $comments = Comment::with(['commentable' => function (MorphTo $morphTo) {
+                $morphTo->constrain([
+                    Post::class => function ($query) {
+                        $query->whereNull('hidden_at');
+                    },
+                    Video::class => function ($query) {
+                        $query->where('type', 'educational');
+                    },
+                ]);
+            }])->get();
+        </pre>
+
+        <p class="description">
+            en este ejemplo eloquent va a SOLO cargar de forma pre cargada posts que no han sigo OCULTADOS y VIDEOS donde el
+            valor de 
+            <span class="functions">type</span> sea "educational"
+        </p>
+
+        <h3 class="sub--subtitule"><span id="hash">#</span> Aplicando reglas a EAGER LOADS con una relacion existente</h3>
+        <p class="description">
+            puedes combinar los metodos with y wherehas para evaluar relaciones de forma eagle load, usando el metodo
+            <span class="functions">withWhereHas</span>
+        </p>
+        <pre class="code">
+ 
+            $users = User::withWhereHas('posts', function ($query) {
+                $query->where('featured', true);
+            })->get();
+        </pre>
+
+        <h3 class="sub--subtitule"><span id="hash">#</span> Lazy Eager Loading </h3>
+        <p class="description">
+
+            Algunas veces necesitas cargar una relacion eager load DESPUES de que el
+             modelo padre ya ha sido recuperado. por ejemplo, Por ejemplo, esto puede ser útil
+              si necesita decidir dinámicamente si desea cargar modelos relacionados:
+        </p>
+
+        <pre class="code">
+
+            use App\Models\Book;
+ 
+            $books = Book::all();
+            
+            if ($someCondition) {
+                $books->load('author', 'publisher');
+            }
+        </pre>
+
+        <p class="description">
+        
+            si necesitas setear reglas adicionales en la query en la 
+            eager loading. Puedes cargar una relacion asi tambien 
+            <span class="functions">loadMissing</span>
+
+        </p>
+
+        <pre class="code">
+
+            $book->loadMissing('author');
+        </pre>
+
+        <h3 class="sub--subtitule"><span id="hash">#</span> si te gustaria hacer un eagle load a una relacion
+            <span class="functiosn">morphTo</span> y tambien a las relaciones anidadas de varias entidades que 
+            deben ser retornadas por la relacion. puedes usar <span class="functions">loadMorph</span>
+         </h3>
+        <p class="description">
+            este metodo acepta el nombre de la relacion polimorfica como su primer argumento y un array de modelos / relaciones ( key value)
+            como segundo argumento.
+        
+        </p>
+        <pre class="code">
+
+             
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\MorphTo;
+            
+            class ActivityFeed extends Model
+            {
+                /**
+                * Get the parent of the activity feed record.
+                */
+                public function parentable(): MorphTo
+                {
+                    return $this->morphTo();
+                }
+            }
+        </pre>
+        <p class="description">
+            Basicamente, puedes cargar relaciones polimorficas y aparte CARGAR relaciones de cada modelo padre
+        </p>
+        <pre class="functions">
+            $activities = ActivityFeed::with('parentable')
+                        ->get()
+                        ->loadMorph('parentable', [
+                            Event::class => ['calendar'],
+                            Photo::class => ['tags'],
+                            Post::class => ['author'],
+                        ]);
+        </pre>
+
+        <h2 class="subtitule"><span id="hash">#</span> Prevenir el comportamiento Lazy Loading </h2>
+        <p class="description">
+            como se vio antes, usar eagle loading, puede reducir demasiadas consultas a la base de datos, 
+            cosa que lazy loadin hace. entonces, PUEDES indicar a la aplicacion de laravel que se comporte por defecto
+            con relaciones eagle loading ( cambiando el lazy loading ).
+        </p>
+        <p class="description">
+            para completar esto solo debes usar el metodo <span class="functions">preventLazyLoading</span>
+            en el metodo <span class="functions">boot</span> de la clase <span class="functions">AppServiceProvider</span>
+        </p>
+
+        <pre class="code">
+
+            use Illuminate\Database\Eloquent\Model;
+ 
+            /**
+            * Bootstrap any application services.
+            */
+            public function boot(): void
+            {
+                Model::preventLazyLoading(! $this->app->isProduction());
+            }
+        </pre>
+        <p class="description">
+            Solo acepta un booleano, dependiendo este boolaneo se aplicara.
+        </p>
+        <p class="description">
+            Despues de aplicar esta regla general en la app, Eloquent mandara un error de tipo
+            <span class="functions">Illuminate\Database\LazyLoadingViolationException</span> cuando intentes hacer una 
+            lazy load en una relacion de eloquent ( sin usar with te dara error, deberas cargar las relaciones manualmente )
+        </p>
+        <p class="description">
+            Ademas, puedes personalizar el comportamiento de las "lazy loading violations" ( violaciones de lazy loading ), por ejemplo,
+            puedes indicar que las violaciones de lazy loading SOLO DEBAN ser logeadas en lugar de interrumpir la ejecucion de la aplicacion
+            con excepcciones.
+        </p>
+
+        <pre class="code">
+
+            Model::handleLazyLoadingViolationUsing(function (Model $model, string $relation) {
+                $class = $model::class;
+             
+                info("Attempted to lazy load [{$relation}] on model [{$class}].");
+            });
+        </pre>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"><span id="hash">#</span>Insertando y Actualizando modelos relacionados</h2>
+        <h3 class="sub--subtitule"><span id="hash">#</span> el metodo <span class="functions">save</span></h3>
+        <p class="description">
+            Eloquent te da metodos para añadir nuevos modelos a las relaciones. por ejemplo, quizas necesites añadir un
+            comentario a un post ( <span class="functions">Comment</span> a <span class="functions">Post</span> ).
+
+            en vez de manualmente indicar el post_id del modelo <span class="functions">Comment</span>, puedes hacer una insercion accediendo a la relacion
+            y usando <span class="functions">save</span>
+        </p>
+        <pre class="code">
+
+            use App\Models\Comment;
+            use App\Models\Post;
+            
+            $comment = new Comment(['message' => 'A new comment.']);
+            
+            $post = Post::find(1);
+            
+            $post->comments()->save($comment);
+        </pre>
+        <p class="description">
+            nota que nunca se accedio a la instancia de Comments, mas bien, se accedio al post y se creo un registro desde post->comments()
+            , el metodo <span class="functions">save</span> en este contexto va a añadir en automatico el valor de 
+            <span class="functions">post_id</span> al modelo <span class="fucntions">Comment</span> 
+        </p>
+        <p class="description">
+            Ademas! puedes salvar multiples registros accediendo a la relacion con el metodo
+            <span class="functions">saveMany</span> para crear MUCHOS registros
+        </p>   
+        <pre class="code">
+
+            $post = Post::find(1);
+            
+            $post->comments()->saveMany([
+                new Comment(['message' => 'A new comment.']),
+                new Comment(['message' => 'Another new comment.']),
+            ]);
+        </pre>
+        <p class="fucntions">
+            Piensa que aqui solo los guardas en la tabla, PERO NOS E ASIGNAN EN MEMORIA, si deseas acceder 
+            a estos datos puedes usar <span class="functions">refresh()</span> para obtener de nuevo los registros ya actualizados.
+        </p>
+        <pre class="code">
+
+            $post->comments()->save($comment);
+ 
+            $post->refresh();
+            
+            // All comments, including the newly saved comment...
+            $post->comments;
+        </pre>
+
+        <h3 class="sub--subtitule"><span id="hash">#</span> salvando de manera recursiva modelos y relaciones  <span class="functions">push</span></h3>
+        <p class="description">
+            si quieres salvar el modelo y TODAS sus relaciones asociadas puedes usar el metodo 
+            <span class="functions">push</span>, en este ejemplo: cuando hagas push salvaras
+            <ul class="u-list">
+                <li>
+                    salvaras el modelo
+                </li>
+                <li>
+                    salvaras el modelo de <span class="functions">message</span>
+                </li>
+                <li>
+                    salvaras el modelo de <span class="functions">author</span>
+                </li>
+            </ul>
+        </p>
+
+        <p class="description">
+            Ademas, puedes usar el metodo <span class="functions">pushuietly</span> para guardar
+            el modelo y sus relaciones sin EJECUTAR LOS EVENTOS DEL MODELO.
+        </p>
+
+    </section>
+    
+    <section class="description">
+        <h2 class="subtitule"><span id="hash">#</span> El metodo <span class="functions">Create</span> en relaciones </h2>
+        <p class="description">
+            ademas del metodo <span class="functions">save</span> y el metodo 
+            <span class="functions">saveMany</span>. puedes usar el metodo <span class="functions">create</span>
+
+        </p>    
+        <p class="description">
+            Este metodo acepta los atributos del modelo ( las columnas y valores ), crea el modelo y lo inserta en la DATABASE.
+            la unica diferencia entre "save" y <span class="code">Create</span> es que save acepta una instancia COMPLETA del modelo, 
+            mientras que create acepta un array de PHP, ademas, el nuevo modelo creado se retornara.
+        </p>
+        <pre class="code">
+
+            //crear uno
+            use App\Models\Post;
+ 
+            $post = Post::find(1);
+            
+            $comment = $post->comments()->create([
+                'message' => 'A new comment.',
+            ]);
+
+
+
+
+            // Crear muchos
+            $post = Post::find(1);
+ 
+            $post->comments()->createMany([
+                ['message' => 'A new comment.'],
+                ['message' => 'Another new comment.'],
+            ]);
+        </pre>
+        <p class="description">
+            Ademas, tienes los metodos
+            <span class="functions">createQuietly</span> y 
+            <span class="functions">createManyQuetly</span>
+            , estos pueden ser usados para crear modelos sin ejecutar eventos de modelos
+
+        </p>
+        <pre class="code">
+
+            $user = User::find(1);
+ 
+            $user->posts()->createQuietly([
+                'title' => 'Post title.',
+            ]);
+            
+            $user->posts()->createManyQuietly([
+                ['title' => 'First post.'],
+                ['title' => 'Second post.'],
+            ]);
+        </pre>
+
+        <h2 class="subtitule"><span id="hash">#</span> Belongs To Relatiopnship  </h2>
+        <p class="description">
+            Si te gustaria asignar el modelo hijo a un modelo padre, debes usar el metodo
+            <span class="functions">associatr</span>
+        </p>
+        <p class="description">
+            En este ejemplo: el modelo <span class="functions">User</span> define una relacion de tipo
+            <span class="functions">belongsTo</span> al modelo <span class="functions">Account</span>.
+
+            el metodo <span class="function">associate</span> va a setear la llave foranea en en el modleo hijo.
+        </p>
+        <pre class="code">
+
+            use App\Models\Account;
+ 
+            $account = Account::find(10);
+            
+            $user->account()->associate($account);
+            
+            $user->save();
+        </pre>
+        <p class="description">
+            Basicamente, estas ASOCIANDO el modelo hijo al modelo padre en una relacion de tipo 
+            <span class="code">BelongsTo</span>, seteando automaticamente el user_id en Account, puedes usar
+            <span class="functions">dissociate</span> para lograr lo inverso. seteando la llave foraneo en null.
+        </p>
+        <pre class="code">
+
+            $user->account()->dissociate();
+ 
+            $user->save();
+        </pre>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"><span id="hash">#</span> relaciones many to many </h2>
+        <h3 class="sub--ubtitule"><span id="hash">#</span> Acoplamiento y Desacoplamiento </h3>
+        <p class="description">
+            en relaciones muchos a muchos ( por ejemplo 1 usuario tiene muchso roles y 1 role tiene muchos usuarios )
+            puedes usar el metodo <span class="functions">Attach</span> para Acoplar el role a un usuario insertando un registro
+            en la tabla intermediaria ( pivote )
+        </p>
+
+        <pre class="code">
+
+            use App\Models\User;
+ 
+            $user = User::find(1);
+            
+            $user->roles()->attach($roleId);
+        </pre>
+        <p class="description">
+            puedes pasar tambien un array de data adicional para ser insertada en la tabla pivote 
+        </p>
+        <pre class="code">
+
+            $user->roles()->attach($roleId, ['expires' => $expires]);
+        </pre>
+        <p class="description">
+            Aveces sera necesario remover un role de un usuario. para remover un registro
+            de la relacion many-to-many usa el metodo <span class="functions">detach</span>.
+
+            este metodo detach va a borrar los registros asociados de la tabla asociada y ambos modelos se mantendran
+            en la tabla intermedia
+        </p>
+        <pre class="code">
+
+            // Detach a single role from the user...
+            $user->roles()->detach($roleId);
+             
+            // Detach all roles from the user...
+            $user->roles()->detach();
+        </pre>
+        <p class="description">
+
+            por coveniencia, el metodoo <span class="functions">attach</span> y el metodo
+            <span class="functions">detach</span> aceptan un arreglo de IDS
+        </p>
+        <pre class="code">
+
+            $user = User::find(1);
+ 
+            $user->roles()->detach([1, 2, 3]);
+            
+            $user->roles()->attach([
+                1 => ['expires' => $expires],
+                2 => ['expires' => $expires],
+            ]);
+        </pre>
+
+        <h3 class="sub--ubtitule"><span id="hash">#</span> Sincronizando asosiaciones </h3>
+        <p class="description">
+            puedes tambien usar el metodo <span class="functions">sync</span> para construir asosiaciones
+            many-to-many. el metodo "sync" acepta un array de IDs para ubicar en la tabla intermediaria.
+
+            este metodo, busca poner todos los IDs en la tabla intermediaria y BORRAR TODO LO DEMAS. asi que cuando se coomplete
+            todos los ids que no diste en el array seran removidos.
+        </p>
+        <pre class="code">
+
+            $user->roles()->sync([1, 2, 3]);
+
+
+            $user->roles()->sync([1 => ['expires' => true], 2, 3]);
+        </pre>
+        <p class="description">
+
+            si quieres insertar los mismos valores de la tabla intermedia con apatrte cada uno de los IDs sincronizados
+            puedes usar el metodo <span class="functions">syncWithPivotValues</span> o lo inverso con 
+            <span class="functions">syncWithoutDetaching</span>
+        </p>
+        <pre class="code">
+
+            $user->roles()->syncWithPivotValues([1, 2, 3], ['active' => true]);
+
+
+            $user->roles()->syncWithoutDetaching([1, 2, 3]);
+        </pre>
+
+        
+        <h3 class="sub--ubtitule"><span id="hash">#</span> Toggling associations </h3>
+        <p class="descriptions">
+            Aqui nadamas buscas hacer toogles, osea, asociar lo no asociado y desasociar lo asociado
+        </p>
+        <pre class="code">
+
+            $user->roles()->toggle([1, 2, 3]);
+
+
+            $user->roles()->toggle([
+                1 => ['expires' => true],
+                2 => ['expires' => true],
+            ]);
+        </pre>
+        <p class="description">
+            Puedes ademas actualizar con el metodo <span class="functions">updateExistingPivot</span>
+        </p>
+        <pre class="code">
+
+            $user = User::find(1);
+ 
+            $user->roles()->updateExistingPivot($roleId, [
+                'active' => false,
+            ]);
+        </pre>
+
+        
+        
+        
+    </section>
+    <section class="section">
+        <h2 class="subtitule"><span id="hash">#</span> Touching Parent Timestamps </h2>
+        <p class="description">
+            se refiere a que cuando ocurre X evebto en un modelo hijo, puedes actualizar los timestamps
+            del modelo padre.
+
+            imagina que tienes el modelo <span class="functions">Post</span> y ese modelo tiene <span class="functions">Comments</span>
+            ( uno a muchos ), entonces, si tu quieres que cuando un comentario se edite se actualize el 
+            <span class="functions">Updated_at</span>del padre. para lograr esto solo necesitas definir la propiedad privada 
+            <span class="functions">protected $touches</span> en el modelo hijo y setearla con la relacion al modelo padre que deberia actualizar su updated_at
+            cuando el modelo hijo es actualizado
+
+        </p>
+        <pre class="code">
+
+            namespace App\Models;
+ 
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Relations\BelongsTo;
+            
+            class Comment extends Model
+            {
+                /**
+                * All of the relationships to be touched.
+                *
+                * @var array
+                */
+                protected $touches = ['post'];
+            
+                /**
+                * Get the post that the comment belongs to.
+                */
+                public function post(): BelongsTo
+                {
+                    return $this->belongsTo(Post::class);
+                }
+            }
+        </pre>
+    </section>
+</body>
+</html>

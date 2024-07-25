@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laravel Jetstream</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #171923;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 7px;
+        }
+        .section{
+            margin-top: 22px;
+        }
+        .main--title{
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        .subtitule{
+            margin-bottom: 10px;
+            margin-top: 14px;
+        }
+        #hash{
+            color: rgba(255, 0, 0, 0.709);
+        }
+        .description{
+            padding-left: 26px;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+        .code{
+            background-color: #08090c;
+            margin: 23px 0px;
+        }
+        .sub--subtitule{
+            margin-bottom: 10px;
+            margin-top: 12px;
+        }
+        .u-list{
+            margin-left: 67px;
+            font-size: 18px;
+        }
+        .u-list li::marker{
+            color: red;
+        }
+        .functions{
+            background-color: #252a37 ;
+            color: #eb4432;
+        }
+    
+    
+        table {
+                border-collapse: collapse;
+                width: 100%;
+                text-align: center;
+            }
+      
+            table, th, td {
+                border: 1px solid white;
+    
+            }
+    
+            th{
+                padding: 8px;
+                text-align: center;
+            }
+            td{
+                text-align: left;
+            }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> ¿Que es Laravel Jetstream? </h2>
+        <p class="description">
+            Laravel JETSTREAM es un paquete de Laravel que te da un kit de inicio para tus aplicaciones web, 
+            este kit de inicio te incluye.
+            <ul class="u-list">
+                <li>
+                    Autenticacion de usuarios ( Sistema de registro, Inicio de sesion y Gestion de cuentas )
+                </li>
+                <li>
+                        Sistema de Gestion de Equipos ( Te permite crear y gestionar equipos para colaboracion)
+                </li>
+                <li>
+                    API Tokens: te permite crear y gestionar API tokens
+                </li>
+                <li>
+                    Perfil de usuario: te da paginas para que el usuario pueda actualizar sus datos y 
+                            preferencias.
+                </li>
+                <li>
+                    Soporte para Inertia, livewire y uso de Tailwind CSS
+                </li>
+            </ul>
+        </p>
+        <p class="description">
+            en resumen, jetstream es un paquete de laravel que te ofrece un "punto de inicio"
+            para desarrollar tus aplicaciones web. jetstream te da una serie de paginas y funcionalidades ya creadas por ti,
+            dandote el sistema de login, registro, verificacion de email, gestion y creacion de equipos 
+            , el manejo de sesiones y la posibilidad
+            de crear API tokens añadiendole sanctum.
+        </p>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> Introduccion a laravel jetstream </h2>
+        <h2 class="subtitule"> <span class="hash">#</span> Laravel Fortify </h2>
+        <p class="description">
+            laravel fortify es un paquete que te ofrece un backend ya hecho sin interfaz 
+            de usuario, Fortify te crea controladores y rutas para manejar autenticacion 
+            de usuarios, registros, verificaciones de email, manejo de sesiones, etc.
+        </p>
+        <p class="description">
+            MUCHO del comportamiento de fortify viene definido en el archivo
+            <span class="functions">config/fortify.php</span>, dentro de este archivo configuras
+            el comportamiento de Fortify en tu aplicacion.
+        </p>
+    </section>
+
+    <section class="description">
+        <h2 class="subtitule"> <span class="hash">#</span> Acciones </h2>
+        <p class="description">
+            En resumen, cuando se instala Fortify en tu aplicacion, genera un conjunto 
+            de controladores
+            destinados a manejar
+            <ul class="u-list">
+                <li>El sistema de inicio de sesion</li>
+                <li>El sistema de registro de usuarios</li>
+                <li>El manejo de sesiones</li>
+                <li>Verificacion de correos electronicos</li>
+                <li>Two Factor Authentication</li>
+                <li>Creacion y gestion de equipos de colaboracion</li>
+                <li>Usando sanctum, puedes usar generar API TOKENS</li>
+            </ul>
+        </p>
+        <p class="description">
+            Jestream lo que hace es implementar una forma para que puedas modificar ciertos comportamientos
+            de Fortify sin tener que meterte al controlador que fortify configuro, eso se logra mediante clases
+            <span class="functions">Actions</span> las cuales encuentras en 
+            <span class="functions">app/Actions/Fortify</span>, entonces, mediante un Action puedes modificar o personalizar mas
+            la:
+            <ul>
+                <li>Creacion de usuarios</li>
+                <li>Eliminacion de usuarios</li>
+                <li>Registro de usuarios</li>
+                <li>ETC</li>
+            </ul>
+        </p>
+        <p class="description">
+            Por ultimo, tambien puedes personalizar acciones de Jetstream
+        </p>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> Paginas / Vistas </h2>
+        <p class="description">
+            Cuando instalas laravel jetsream, este paquete instala por ti una serie de Vistas 
+            ( osea livewire component O inertia components ) las cuales puedes encontrar 
+            ( en este caso hablando de inertia que es lo que deseo aprender ) en 
+            <span class="functions">Resource/js/pages</span>. estos componentes
+            ya tienen TODAS las caracteristicas base de Jestream creadas y conectadas a fortify, TU puedes
+            personalizarlas como gustes ya que jestream es solo una base de punto de inicio.
+
+        </p>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> Los layouts de la aplicacion. </h2>
+        <p class="description">
+            basicamente, cuando instalas Jestream tambien te instala 2 layouts,
+             1 layout para el diseño de las paginas de invitado, osea, 
+             de paginas donde un usuario NO ESTA AUTENTICACO EN NUESTRA APP,
+            como puede ser un iniciar secion, una pagina de registro, 
+            una pagina de recuperar credenciales.
+            ademas, se instala un 2do layout que se usa para 
+            el diseño de las paginas de un usuario AUTENTICADO. 
+            estos layouts los encuentras en caso de inertia en resource/views/layouts
+            y TODOS los componentes heredan de un layout u otro.
+        </p>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> La pagina Dashboard </h2>
+        <p class="description">
+            La vista Dashboard es la vista principal que se muestra
+             una vez el usuario ha iniciado sesion, la encuentras
+             <span class="functions">resources/js/pages/dashboard</span>
+        </p>
+
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> Tailwind CSS en tu app </h2>
+        <p>
+            en resumen cuando instalas jetsream, instalas tambien TailwindCSS y 
+            se te configuran 2 archivos, el <span class="functions"> tailwind.config.js</span>
+            y el <span class="functions">postcss.config.js  </span>
+            que se usan para construir la salida COPILADA CSS de tu aplicacion, ademas,
+            actualiza tu package.json
+            con comandos de npm patra construir los assets CSS de tu app.
+        </p>
+    </section>
+    <pre class="code">
+
+        # Compile your CSS / JavaScript for development and recompile on change...
+        npm run dev
+
+        # Compile your CSS / JavaScript for production...
+        npm run build
+    </pre>
+    
+
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> Creando aplicaciones de Jetstream </h2>
+        <p class="description">
+            Jetstream solo es un kit de inicio que te da una base solida, para que luego TU TE ENCARGUES DE PERSONALIZAR Y MANTENER
+        </p>
+        <h2 class="subtitule"> <span class="hash">#</span> Entendiendo el componente Dashboard y su layout</h2>
+        <p class="description"> 
+            Una vez te inicies sesion correctamente en la aplicacion, se te redirigira a la ruta
+            <span class="functions">/dashboard</span> y te renderizara el componente Dashboard.vue ( recuerda que la guia es
+            enfocada a inertia vue ). el componente <span class="functions">Dashboard</span> HEREDA ( extiende ) de el layout
+            <span class="functions">AppLayout</span>, el AppLayout es el Layout que todas las paginas
+             de un usuario ( Autenticado ) hereda! dandole el diseñño a todos los componentes.
+        </p>
+        <p class="description">
+            En EL <span class="functions">AppLayout</span> puedes encontrar lo que se muestra tanto en computadoras
+            como en moviles ( dependiendo el responsive muestra unas cosas o otras ). Aparte, al final de layout tienes estas 2 cosas:
+        </p>
+        <pre class="code">
+                 !-- Page Heading --
+                 &lt;header v-if="$slots.header" class="bg-white shadow"&gt
+                    &lt;div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8"&gt
+                        &lt;slot name="header" /&gt
+                    &lt;/div&gt
+                &lt;/header&gt
+    
+                !-- Page Content --
+                &lt;main&gt
+                    &lt;slot /&gt
+                &lt;/main&gt
+        </pre>
+        <h2 class="subtitule"> <span class="hash">#</span> ¿Que son estos slots de vue? </h2>
+        <p class="description">
+            si nos fijamos tenemos 2 slots:
+            <ul class="u-list">
+                <li>El slot del "Page Heading" ( header )</li>
+                <li>El slot del "Page Content" ( contenido de la pagina )</li>
+            </ul>
+        </p>
+        <p class="description">
+            el slote de page Heading se renderiza SOLO si la variable $slots.header existe... 
+            ¿De donde se saca esta variable?
+        </p>
+        <pre class="code">
+
+            &lt;template>
+                &lt;AppLayout title="Dashboard"&gt
+
+                    &lt;template #header&gt
+                        &lt;h2 class="font-semibold text-xl text-gray-800 leading-tight"&gt
+                            Dashboard AJUA
+                        &lt;/h2&gt
+                    &lt;/template&gt
+            
+
+                    &lt;div class="py-12"&gt
+                        &lt;div class="max-w-7xl mx-auto sm:px-6 lg:px-8"&gt
+                            &lt;div class="bg-white overflow-hidden shadow-xl sm:rounded-lg"&gt
+                                &lt;Welcome /&gt
+                            &lt;/div&gt
+                        &lt;/div&gt
+                    &lt;/div&gt
+                &lt;/AppLayout&gt
+
+
+            &lt;/template&gt
+            
+        </pre>
+        <p class="description">
+            Basicamente, cada componente hijo que hereda de AppLyout puede mandarle props al madre mediante la siintaxis
+            <span class="functions">  #variable</span> esto manda un slot al padre ( dato ) y este lo recibe
+             dinamicamente
+        </p>
+        <p class="description">
+            En el caso de la etiqueta <span class="functions">slots </span>, aqui se renderiza todo lo que le metas
+            al componente AppLayout, slot sustituye todo el HTML que le metas al hijo.
+        </p>
+
+        <h2 class="subtitule"> <span class="hash">#</span> resumen del contenido del AppLayout</h2>
+        <p class="description">
+            En resumen, AppLayout es el layout usado para las vistas de un usuario autenticado ( cuando esta dentro de la app)
+            , y estoy layout contiene:
+            <ul class="u-list">
+                <li>El menu de navegacion "normal"</li>
+                <li>El menu de navegacion "RESPONSIVE"</li>
+                <li>El menu de configuracion "normal" y "responsive" </li>
+                <li>El header slot</li>
+                <li>El slot GENERAL ( el contenido que renderizara de los hijos )</li>
+            </ul>
+        </p>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> Perfil del usuario</h2>
+        <p class="description">
+            Jetstream configura una pagina de perfil de usuario en la cual puedes ver a el usuario y 
+            puedes hacer que este actualize sus password, email, cerrar su sesion en otros dispositivos, etc.
+            la vista se encuentra en <span class="functions">resopurce/js/pages/profile/show.vue</span>
+        </p>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> Team Managment </h2>
+        <p class="description">
+            Si activas esta caracteristica, se te daran pantallas para manejar el TEAM MANAGMENT asi como su configuracion.
+            los forms se comunican a una actvion ( toda la data es recibida en una variable ) y ya en el action puedes tratar
+            la data.
+        </p>
+    </section>
+
+    <section class="description">
+        <h2 class="subtitule"> <span class="hash">#</span> Banners </h2>
+        <p class="description">
+            Aparte, jetstream te da banners pre hechos ( mensajes de alerta ) en este caso por componentes de vue,
+            los cuales puedes "flashear" a la sesion. ( ve documentacion para mas detalles, pero es muy simple )
+        </p>
+    </section>
+
+    <section class="description">
+        <h2 class="subtitule"> <span class="hash">#</span> Autenticacion de un usuario a detalle </h2>
+        <p class="description">
+            ¿Como se renderizan las vistas de autenticacion como el login?: Simple! estas vistas se renderizan en automatico.
+            fortify renderiza todo esto por ti, si quieres PERSONALIZAR que vista se renderiza como login y que datos se le mandaran
+            DEBES ACCEDER AL <span class="functions">App/Providers/JetstreamServiceProvider</span> y en el metodo
+            <span class="functions">boot</span> llamar el siguiente codigo de Fortify.
+        </p>
+        <pre class="code">
+
+            Fortify::loginView(function () {
+                return Inertia::render('Auth/Login', [
+                    'canResetPassword' => Route::has('password.request'),
+                    'status' => session('status'),
+                ])
+            })
+        </pre>
+        <p class="description">
+            de esta manera indicas que vista debe renderizarse y con que propiedades!
+        </p>
+
+
+        <h2 class="subtitule"> <span class="hash">#</span> Personalizando el proceso de Autenticacion. </h2>
+        <p class="description">
+            Al igual que puedes personalizar que vista se retorna y con que data, puedes personalizar como se hace la autenticacion.
+            para esto debes suar el metodo <span class="functions">Fortify::authenticateUsing</span>. 
+
+            El método authenticateUsing acepta un closure que recibe la solicitud HTTP entrante.
+             El closure es responsable de validar las credenciales de inicio de sesión adjuntas a 
+            la solicitud ( Request ) y devolver la instancia de usuario asociada.
+
+            si no encuentra nada, debe retornar FALSE para indicar una autenticacion fallida.
+        </p>
+        <pre class="code">
+
+            public function boot(): void
+            {
+                // ...
+
+                Fortify::authenticateUsing(function (Request $request) {
+                    $user = User::where('email', $request->email)->first();
+
+                    if ($user &&
+                        Hash::check($request->password, $user->password)) {
+                        return $user;
+                    }
+                });
+            }
+        </pre>
+        <p class="description">
+            Aparte, puedes encapsulkar en una clase aparte el proceso de autenticacion pasandole un array al metodo con la
+            clase y metodo a ejeutar.
+        </p>
+        <pre class="code">
+
+            use App\Actions\AuthenticateLoginAttempt;
+            use Laravel\Fortify\Fortify;
+
+            Fortify::authenticateUsing([new AuthenticateLoginAttempt, '__invoke']);
+        </pre>
+
+        <h2 class="subtitule"> <span class="hash">#</span> Personalizando los PIPELINES de autenticacion</h2>
+        <p class="description">
+            En primera instancia...¿Que es un pipeline?, un pipeline es un array 
+            con un CONJUNTO de clases, las cuales se ejecutaran secuencialmente., en el contexto de fortify, estas clases reciben
+            la request HTTP y es pasada atravez de todas las clases EN ORDEN. velo como que cada clase es una etapa del login y puedes
+            definir logica a ejecutar en cada etapa de tu pipeline.
+        </p>
+        <p class="description">
+            Para lograr personalizar este pipeline puedes usar el metodo <span class="functions">Fortify::AuthenticateThrough</span>
+
+        </p>
+        <pre class="code">
+
+            Fortify::authenticateThrough(function (Request $request) {
+                return array_filter([
+                        config('fortify.limiters.login') ? null : EnsureLoginIsNotThrottled::class,
+                        RedirectIfTwoFactorAuthenticatable::class,
+                        AttemptToAuthenticate::class,
+                        PrepareAuthenticatedSession::class,
+                ]);
+            });
+        </pre>
+        <p class="description">
+            Jetstream maneja tu sisntema de autenticacion en automatico, retornando las vistas como 
+            de login y register en automatico, si deseas PERSONALIZAR el comportamiento de las
+             vistas y el proceso de autenticacion, debes usar una serie de metodos en el BOOT 
+             del JetstreamServiceProvider.
+        </p>
+
+    </section>
+    
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> Reset de passwords </h2>
+        <p class="description">
+            Como es tipico en otras funcionalidades. cuando quieres RESETEAR LA PASSWORD de un usuario, se llamara a la accion
+            <span class="functions">App/Actions/Fortify/ResetUserPassword</span>, aqui se recibira la accion como tal y podras personalizarla
+            mas o cambiarla.
+        </p>
+        <pre class="code">
+
+            class ResetUserPassword implements ResetsUserPasswords
+            {
+                use PasswordValidationRules;
+
+                /**
+                * Validate and reset the user's forgotten password.
+                *
+                * @param  array<string, string>  $input
+                */
+                public function reset(User $user, array $input): void
+                {
+                    Validator::make($input, [
+                        'password' => $this->passwordRules(),
+                    ])->validate();
+
+                    $user->forceFill([
+                        'password' => Hash::make($input['password']),
+                    ])->save();
+                }
+            }
+
+        </pre>
+        <p class="description">
+            Esta acción es responsable de validar la nueva contraseña del usuario y actualizar la contraseña en la instancia del usuario. 
+            La acción recibe un arreglo $input que contiene toda la entrada de la solicitud entrante
+        </p>
+
+        <h2 class="subtitule"> <span class="hash">#</span> Validacion de contraseñas </h2>
+        <p class="description">
+            Tanto las acciones: 
+            <ul class="u-list">
+                <li>crear usuario: <span class="functions">App\Actions\Fortify\CreateNewUser</span></li>
+                <li>Actualizar contraseña de usuario: <span class="functions">App\Actions\Fortify\ResetUserPassword</span></li>
+                <li>RESETEAR la contraseña del usuario: <span class="functions">App\Actions\Fortify\UpdateUserPassword</span></li>
+            </ul>
+        </p>
+        <p class="description">
+            Todas estas accciones utilizan un trait llamado 
+            <span class="functions">App\Actions\Fortify\PasswordValidationRules</span>, este trait cuenta con un metodo llamado
+            <span class="functions">passwordRules</span> el cual puedes personalizar para definir tus reglas.
+        </p>
+        <p class="description">
+            Algunos metodos para personalizar las reglas de passwords en tu aplicacion.
+        </p>
+        <pre class="code">
+
+            use Laravel\Fortify\Rules\Password;
+
+            // Require at least 10 characters...
+            (new Password)->length(10)
+
+            // Require at least one uppercase character...
+            (new Password)->requireUppercase()
+
+            // Require at least one numeric character...
+            (new Password)->requireNumeric()
+
+            // Require at least one special character...
+            (new Password)->requireSpecialCharacter()
+        </pre>
+        <pre class="code">
+            //Ejemplo
+
+            (new Password)->length(10)->requireSpecialCharacter()
+        </pre>
+    </section>
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> Vistas / Paginas de reset de Passwords </h2>
+        <p class="description">
+            Jetstream te da 2 vistas para el Resets de passwords, la primera es una vista destinada a darte un ENLACE
+            para restablecer contraseñas. una vez das click en el enlace, podras resetear tu password en la OTRA VISTA
+
+            <ul class="u-list">
+                <li> Link para restablecer passwords: <span class="functions">resources/js/Pages/Auth/ForgotPassword.vue</span> </li>
+                <li>Vista que restablece la contraseña ( despues del link ) <span class="functions">resources/js/Pages/Auth/ResetPassword.vue</span></li>
+            </ul>
+        </p>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"> <span class="hash">#</span> Validacion de contraseñas </h2>
+        <p class="description">
+            Al igual que lo demas, jetstream te da una vista YA HECHA para el proceso de registro asi como la funcionalidad gracias a fortify.
+            la clase Action que maneja el registro de nuevos usuarios se encuentra
+            en <span class="functions">App\Actions\Fortify\CreateNewUser</span>. ¿Que ruta se llama para registrar un usuario? Respuesta: register
+        </p>
+        <pre class="code">  
+            const form = useForm({
+                name: '',
+                email: '',
+                password: '',
+                password_confirmation: '',
+                terms: false,
+            });
+            
+            //esto se manda a llamar en el componente de VUE y esta anidado a un useForm
+            const submit = () => {
+                form.post(route('register'), {
+                    onFinish: () => form.reset('password', 'password_confirmation'),
+                });
+            };
+        </pre>
+        <p class="description">
+            Por no repetirlo, se usa el mismo trai de <span class="functions">PasswordValidationsRules</span> para 
+            el registro de usuarios y la pagina del componente se encuentra en 
+            <span class="functions">resources/js/Pages/Auth/Register.vue</span>
+        </p>
+    
+        <h2 class="subtitule"> <span class="hash">#</span> Personalizando la vista de registro </h2>
+        <p class="description">
+            Al igual que la vista login, solo debes ir al <span class="functions">JetstreamServiceProvider</span> PERO en el metodo boot
+            usar el metodo correspondiente: <span class="functions">Fortify::registerView</span>
+        </p>
+        <pre class="code">
+
+            Fortify::registerView(function () {
+                return view('auth.register');
+            });
+        </pre>
+
+        <h2 class="subtitule"> <span class="hash">#</span> Hacer que el usuario aceote terminos y condiciones de tu aplicacion </h2>
+        <p class="description">
+            Jetstream te ofrece la funcionalidad de que el usuario deba marcar un checbox aceptando "Terminos y condiciones de la aplicacion"
+            para poder registrarse, ademas, de darte una forma de escribir estos terminos en lenguaje Markdown.
+        </p>
+        <p class="description">
+            El primer paso es HABILITAR esta funcionalidad en el archivo <span class="functions">config/jetstream.php</span>
+        </p>
+        <pre class="code">
+
+            use Laravel\Jetstream\Features;
+
+            'features' => [
+                Features::termsAndPrivacyPolicy(),
+                // Features::profilePhotos(),
+                // Features::api(),
+                // Features::teams(),
+                Features::accountDeletion(),
+            ],
+        </pre>
+        <p class="description">
+            Luego simplemente debes de modificar los archivos
+            <span class="functions">resources/markdown/terms.md</span> y 
+            <span class="functions">resources/markdown/policy.md</span>. cuando el usuario haga click en el link de "ver terminos y condificones" 
+            se le mostrara el markdown correspondiente ( se usara un plugin de Tailwind CSS para renderizar el MARKDOWN en un formato bueno)
+        </p>
+        <p class="description">
+            APARTE puedes hacer que estos terminos y condiciones CAMBIEN segun el 
+            idioma DE TU APLICACION ( no del usuario que te visita ). solo debes agregar el suffix del idioma.
+            como por ejemplo <span class="functions">terms.es.md</span>
+        </p>
+
+        <h2 class="subtitule"> <span class="hash">#</span> Verificacion de Email </h2>
+        <p class="description">
+            Jetstream da soporte a la verificacion de un email, pero, debes activar la funcionalidad ya que viene deshabilitada por default
+            , para lograrlo, debes ir al array de <span class="functions">features</span> en el archivo <span class="functions">config/Fortify.php</span>
+        </p>
+        <pre class="code">
+
+            use Laravel\Fortify\Features;
+
+            'features' => [
+                Features::registration(),
+                Features::resetPasswords(),
+                Features::emailVerification(),
+                Features::updateProfileInformation(),
+                Features::updatePasswords(),
+                Features::twoFactorAuthentication(),
+            ],
+        </pre>
+        <p class="description">
+            Como paso siguiente, debes de asegurarte que tu modelo <span class="functions">User</span> implemente la interfaz
+            <span class="functions">Illuminate\Contracts\Auth\MustVerifyEmail</span>
+        </p>
+        <pre class="code">
+
+            use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+            class User extends Authenticatable implements MustVerifyEmail
+            {
+                // ...
+            }
+        </pre>
+        <p class="description">
+            Despues de implementar estas 2 cosas, tu aplicacion mandara un EMAIL de verificacion a tus usuarios para que verifiquen el email.
+        </p>
+        <p class="description">
+            NOTA: Antes de usar esta funcionalidad de "Verificar email del usuario", debes de asegurarte que tu 
+            aplicacion esta configurada para poder mandar emails. de otra manera NO SE MANDARA NINGUN CORREO DE VERIFICACION.
+            <br>
+            https://laravel.com/docs/11.x/mail
+        </p>
+    </section>
+
+
+
+</body>
+</html>

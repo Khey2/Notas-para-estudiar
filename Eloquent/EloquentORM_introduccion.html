@@ -1,0 +1,2456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eloquent ORM ( itnroduccion )</title>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        background-color: #171923;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 7px;
+    }
+    .section{
+        margin-top: 22px;
+    }
+    .main--title{
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+    .subtitule{
+        margin-bottom: 10px;
+        margin-top: 14px;
+    }
+    #hash{
+        color: rgba(255, 0, 0, 0.709);
+    }
+    .description{
+        padding-left: 26px;
+        line-height: 1.8;
+        font-size: 18px;
+    }
+    .code{
+        background-color: #08090c;
+        margin: 23px 0px;
+    }
+    .sub--subtitule{
+        margin-bottom: 10px;
+        margin-top: 12px;
+    }
+    .u-list{
+        margin-left: 67px;
+        font-size: 18px;
+    }
+    .u-list li::marker{
+        color: red;
+    }
+    .functions{
+        background-color: #252a37 ;
+        color: #eb4432;
+    }
+
+
+    table {
+            border-collapse: collapse;
+            width: 100%;
+            text-align: center;
+        }
+  
+        table, th, td {
+            border: 1px solid white;
+
+        }
+
+        th{
+            padding: 8px;
+            text-align: center;
+        }
+        td{
+            text-align: left;
+        }
+</style>
+<body>
+    <h1 class="main--title">Eloquent ORM introduccion</h1>
+    <section class="section">
+        <h2 class="subtitule"><span id="hash">#</span>Introduccion</h2>
+        <p class="description">
+            Laravel incluye "Eloquent ORM" el cual es un Object relational mapper ( mapea objetos de php a tablas de DB), eloquent es usado para interactuar
+            con bases de datos mediante clases llamadas modelos, estos modelos se conectan a tu DATABASE, puedes
+            agregar, eliminar, editar, obtener data de tu Database gracias a los metodos que ya te dan los modelos
+        </p>
+    </section>
+    <section class="section">
+
+        <h2 class="subtitule"><span id="hash">#</span>Generando Clases de tipo Modelo</h2>
+        <p class="description">
+            Para generar un modelo basta con el comando
+        </p>
+        <pre class="code">
+
+              php artisan make:model "NombreModelo"    
+        </pre>
+        <p class="description">
+            Este comando generara un modelo en la carpeta app/Models y extienden de una clase llamada Model,
+            adicionalmente, si quieres crear una migracion puedes agregar la bandera -m o --migration
+        </p>
+
+        <pre class="code"> 
+              php artisan make:model "NombreModel" -m 
+        </pre>
+
+        <p class="description">
+            Puedes generar Modelos y otras clases con las banderas que te da artisan
+        </p>
+
+        <pre class="code"> 
+            # Migracion
+            php artisan make:model "NombreModel" -migration  
+            php artisan make:model "NombreModel" -m         
+
+            # Seeder
+            php artisan make:model "NombreModel" --seed  
+            php artisan make:model "NombreModel" -s     
+
+            
+            # Controller
+            php artisan make:model "NombreModel" --controller  
+            php artisan make:model "NombreModel" -c 
+
+
+            # Controller + Migration + Seed + Policy + Request
+            php artisan make:model "NombreModel" -cmspR
+        </pre>
+
+        <p class="description">Ademas puedes inspeccionar tus modelos con el comando </p>
+        <pre class="code">
+
+            php artisan model:show Name   
+        </pre>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitule"><span id="hash">#</span>Convenciones en los modelos de Eloquent</h2>
+
+        <p class="description">
+            Existen varias convenciones en los modelos de eloquent ( osea en las clases ), a continucion se muestra un modelo basico
+        </p>
+        <pre class="code">
+
+            ?php
+            
+            namespace App\Models;
+            
+            use Illuminate\Database\Eloquent\Model;
+            
+            class Flight extends Model
+            {
+                // ...
+            }
+        </pre>
+
+        <h3 class="sub--subtitule"><span id="hash">#</span>Nombres de tablas</h3>
+        <p class="description">
+            En el ejemplo de modelo de arriba, no estamos indicando EXPLICITAMENTE a que tabla de nuestra Database apunta
+            este modelo, ve un modelo como una clase que administra una tabla, y puedes interactuar con esa tabla a travez de este modelo!
+
+            por defecto, laravel buscara la tabla por el nombre de tu modelo en minusculas, snake case y en plural ( usa el INGLES ) 
+
+        </p>
+
+        <h3><span id="hash">¿</span>Snake Case<span id="hash">?</span></h3>
+
+        <p class="description">
+            Snake case es una forma de escribir en la cual se separan las cosas por "_", osea:
+        </p>
+
+        <pre class="code">
+
+            # Nombre del modelo   # Tabla que buscara
+
+            TyaHorariosActivos == tya_horarios_activos
+        </pre>
+
+        <p class="description">
+            Como ves, las mayusculas las toma para definir espacios!, esto lo hara eloquent en automatico para buscar la tabla
+            en nuestra DB... pero, que pasa si esta tabla no se llama asi, supongamos que tienes el modelo Activos y deseas que este modelo apunte a la tabla activos_fijos
+            , ´para esto puedes definir una propiedad protected que apunte a dicha tabla...
+        </p>
+
+        <pre class="code">
+ 
+            namespace App\Models;
+ 
+            use Illuminate\Database\Eloquent\Model;
+             
+            class Flight extends Model
+            {
+                protected $table = 'activos_fijos';
+            }
+        </pre>
+
+        <p class="description">
+            con definir esto, sera suficiente para conectarlas manualmente
+        </p>
+
+
+        <h3 class="sub--subtitule"><span id="hash">#</span>Primary Keys Llaves primarias</h3>
+        <p class="description">
+            Eloquent por defecto asume que cada tabla cuenta con una columna llamada "id" y que esta columna es tu llave primaria
+            que cumple con 2 requisitos:
+            <ul class="u-list">
+                <li>Es un integer</li>
+                <li>Es un autoincremental</li>
+            </ul>
+        </p>
+        <p class="description">
+            igualmente, puedes indicar el nombre de la columna que actuara como id en caso de que tu tabla no tenga una columna llamada id, usando...
+        </p>
+    
+
+        <pre class="code">
+
+            ?php
+ 
+            namespace App\Models;
+            
+            use Illuminate\Database\Eloquent\Model;
+            
+            class Flight extends Model
+            {
+                protected $primaryKey = 'flight_id';
+            }
+        </pre>
+
+        <p class="description">
+            Con la propiedad protected <span class="functions"> $primaryKey </span>puedes definir la columna que se tomara como id autoincremental
+            , como se menciono, eloquent espera que el id sea un integer autoincremental, en caso de que necesites definir otro tipo de identificador unico
+            ( imagina por ejemplo un numero de serie de un producto), puedes cambiar el tipo de dato de la Primary Key usando la propiedad privada
+            <span class="functions">$keyType</span> 
+        </p>
+
+        <pre class="code">
+
+            class Flight extends Model
+            {
+                /**
+                * The data type of the primary key ID.
+                *
+                * @var string
+                */
+                protected $keyType = 'string';
+            }
+        </pre>
+
+        <h3 class="sub--subtitule"><span id="hash">#</span>Primary Keys COMPUESTAS</h3>
+        <p class="description">
+            Eloquent NO soporta por defecto las llaves primarias compuestas, el equipo de laravel nos dice que podemos agregar Indices,
+            no entrare a produnfidad que son los indices, lo veremos en su respectivo tema.
+        </p>
+
+        <h3 class="subtitule"><span id="hash">#</span>UUID y ULID Keys ( llaves primarias de tipo UUID y ULID)</h3>
+        <p class="description">
+            Existes unas llaves primarias llamadas UUID y ULID, basicamente:
+            <ul class="u-list">
+                <li>UUID: Universal Unique Identifier, es una cadena que sirve como identificador universal UNICO de 36 caracteres ( ejemplo : 550e8400-e29b-41d4-a716-446655440000 )</li>
+                <li>ULID: Universal Unique Lexicographically Sortable Identifier, identificador unico ( igual que uuid) pero diseñado para 
+                    ser ordenable ( ejemplo: 01ARYZ6S41MJ9RDF3X3JZZK6A3 )
+                </li>
+            </ul>
+        </p>
+        <p class="description">
+            Eloquent te da soporte para UUIDs y ULIDs, para esto debes usar el Trait <span class="functions">HasUuids</span> , ademas, tu tabla debe tener una columna configurada
+            para poder recibir dicho UUID
+        </p>
+
+        <pre class="code">
+            use Illuminate\Database\Eloquent\Concerns\HasUuids;
+            use Illuminate\Database\Eloquent\Model;
+            
+            class Article extends Model
+            {
+                use HasUuids;
+            
+                // ...
+            }
+            
+            $article = Article::create(['title' => 'Traveling to Europe']);
+            
+            $article->id; // "8f8e8478-9035-4d23-b9a7-62f4d2612ce5"
+        </pre>
+
+        <p class="description">
+            los ULIDS seria con el trait <span class="functions">HasUlids</span>, elige ULIDs cuando deses indexear registros de la tabla de manera eficiente
+
+            Un índice es una estructura especial asociada a una tabla que permite acceder a los datos de una manera más rápida y eficiente.
+            
+            Indexar implica crear índices en una o más columnas de una tabla en una base de datos. Estos índices funcionan de manera 
+            similar a los índices en la parte posterior de un libro, donde se puede buscar rápidamente una palabra clave y encontrar 
+            la página donde se menciona.
+        
+        </p>
+
+        <h3 class="subtitule"><span id="hash">#</span>Timestamps</h3>
+        <p class="description">
+            Por defecto, eloquent espera que tu TABLA tenga 2 columnas, una llamada "created_at" y otra llamada "updated_at",
+            Eloquent automaticamente actualiza estos valores con fechas ( cuando se crea un registro y cuando se updatea ), si quieres
+            desactivar este comportamiento, solo debes de indicar en el modelo la propiedad
+            publica  <span class="functions">$timestamps = false; </span>
+        </p>    
+        <pre class="code">
+
+            public $timestamps = false
+        </pre>
+        <p class="description">
+            Si necesitas por ejemplo, cambiar el formato de fechas que se inserta en estas columnas, puedes hacerlo mediante
+            la propiedad <span class="functions">$dateFormat</span>
+        </p>
+        <pre class="code">
+
+            /**
+            * The storage format of the model's date columns.
+            *
+            * @var string
+            */
+            protected $dateFormat = 'U';
+        </pre>
+
+        <p class="description">
+            Por otra parte, si deseas apuntar el created-at y updated_at a otras columnas, seria con
+        </p>
+
+        <pre class="code">
+
+            class Flight extends Model
+            {
+                const CREATED_AT = 'creation_date';
+                const UPDATED_AT = 'updated_date';
+            }
+        </pre>
+
+        <p class="description">
+            Por ultimo, puedes indicar que solo en X modelos se omita el comportamiento de created_at y updated_at gracias a la funcion 
+            <span class="functions">withoutTimestamps</span>, dentro del clousre podras modificar registros!
+        </p>
+        <pre class="code">
+
+            Model::withoutTimestamps(fn () => $post->increment('reads'));
+        </pre>
+        
+        <h3 class="subtitule"><span id="hash">#</span>Conexiones a la base de datos</h3>
+        <p class="description">
+            Por defecto, TOODOS LOS MODELOS se conectaran a la misma base de datos que definiste
+            en tus configuraciones globales ( declarado en el <span class="functions">env</span>  o en el <span class="functions">config/database</span> ), pero,
+            
+            puedes cambiar la conexion de X modelos, para que apunten a otra Database, en este caso usarias:
+        </p>
+        
+        <pre class="code">
+            class Flight extends Model
+            {
+                /**
+                * The database connection that should be used by the model.
+                *
+                * @var string
+                */
+                protected $connection = 'mysql';
+            }
+        </pre>
+
+        <h3 class="subtitule"><span id="hash">#</span>Valores de atributos por defecto</h3>
+        <p class="description">
+            cuando recuperas un registro de la database ( ejemplo tienes una tabla con 3 columnas: id, nombre, edad ), los atributos son los nombres de las columnas y su valor!
+
+            es un key => value, entonces, puedes establecer valores por defecto a los atributos de los Modelos de X tabla para que cuando la instancies por primera vez
+            ya vengan llenos con valores por default gracias a la proiedad <span class="functions">$attributes</span>
+
+        </p>
+        <pre class="code">
+
+            class Flight extends Model
+            {
+                /**
+                * The model's default values for attributes.
+                *
+                * @var array
+                */
+                protected $attributes = [
+                    'options' => '[]',
+                    'delayed' => false,
+                ];
+            }
+        </pre>
+
+        <h3 class="subtitule"><span id="hash">#</span>Configurando que tan estricto se comporta Eloquent ORM</h3>
+
+        <p class="description">
+            Laravel te ofrece varios metodos para configurar el comportamiento de Eloquent ORM y que tan estricto
+            es!, por ejemplo, tienes el metodo <span class="functions">preventLazyLoading</span>, a este metodo le mandas un booleano para indicar
+            si el lazy loading deberia ser prevenido. Lazy loading se configura en el service Provider ( el archivo <span class="functions">AppServiceProvider</span> ) en el metodo
+            boot ( arranque)
+        </p>
+        <pre class="code">
+
+                use Illuminate\Database\Eloquent\Model;
+ 
+                /**
+                * Bootstrap any application services.
+                */
+                public function boot(): void
+                {
+                    Model::preventLazyLoading(! $this->app->isProduction());
+                }
+        </pre>
+        <p class="description">
+            La idea de preventLazyLoading es usarlo SOLO EN ENTORNO DE DESARROLLO, lo que hace es que si lo pones en true
+            va a prevenir todas las cargas de relaciones AUTOMATICAS, al recuperar un modelo
+            tendras que cargar las relaciones de este modelo manualmente con el metodo <span class="functions">with</span>
+        </p>
+        <pre class="code">
+
+            $users = User::with('posts', 'profile')->get();
+        </pre>
+        <p class="description">
+            En este ejemplo se estan cargando las relaciones MANUALES posts y profile del modelo users,
+            si <span class="functions"> preventLazyLoading</span> esta activado, esta sera una manera de cargarlas. ( tambien existe load ), caso contrario ( osea, preventLazyLoading esta en false )
+            , cada vez que instancies un modelo vendra con sus relaciones cargadas de manera automatica.
+        </p>
+
+        <p class="description">
+            Aparte, tambien puedes indicarle a laravel que lanze una exepcion cuando intentas asignarle un valor
+            a un atributo que no puede ser llenado ( porque no esta declarado en el array de fillables para massive update )
+            , para esto configurarias en el <span class="functions">AppServiceProvider</span> en el metodo <span class="functions">boot</span>
+            la funcion <span class="functions">preventSilentDiscardingAttributes</span>
+
+        </p>
+
+        <pre class="code">
+            
+            Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
+        </pre>
+        <p class="description">
+            Este metodo te ayudara a prevenir errores inesperados cuando estas desarrollando ( por ejemplo tratando de llenar un atributo que no ha sido agregado al array
+             fillable y que por lo tanto esta siendo "descartado de manera silenciosa" )
+        </p>
+        <h3 class="subtitule"><span id="hash">#</span>Recuperando Modelos</h3>
+        <p class="description">
+            Una vez tu has creado un Modelo y su tabla asociada, estas listo para empezar a recuperar registros de tu
+            DB, el equipo de alravel nos recomienda pensar en cada modelo como un poderoso query builder ( constructor de consultas query sql )
+            que te permite crear consultas mediante funciones, el metodo
+            <span class="functions">all</span> recuperara todos los registros de la tabla
+            a donde apunte el modelo!, Cabe mencionar que cuando uses <span class="functions">Model::all()</span>
+            se te retornara una Collection ( es una clase que sirve como arreglo pero que tiene mas metodos para interactuar con arreglos)
+        </p>
+        <pre class="code">
+
+            foreach (Flight::all() as $flight) {
+                echo $flight->name;
+            }
+        </pre>
+        <h4 class="subtitule"><span id="hash">#</span>Construyendo queries</h4>
+        <p class="description">
+            como cada modelo de eloquent sirve como un query builder.. puedes concatenar metodos
+            y reglas antes de obtener los registros con el metodo <span class="functions">get</span>
+            , en este momento no veremos a profundidad Query Builders ( tiene una seccion entera )
+        </p>    
+        <pre class="code">
+            
+            $flights = Flight::where('active', 1)
+               ->orderBy('name')
+               ->take(10)
+               ->get();
+        </pre>
+        <h4 class="sub--subtitule"><span id="hash">#</span>Refrescando Modelos</h4>
+        <p class="description">
+            Si tu ya tienes una instancia de un modelo que recupero un registro de la DB, puedes "refrescarlo" usando el metodo
+            <span class="functions">fresh</span>,  
+            <span class="functions">refresh</span>
+
+            . <span class="functions">fresh</span> va a recuperar de nuevo el modelo de la base de datos ( registro / registros )
+            . La instancia existente del modelo NO SE VERA AFECTADA.
+        </p>
+        <pre class="code">
+
+            # aqui tienes un registro
+            $flight = Flight::where('number', 'FR 900')->first();
+
+            
+            # tendras el mismo registro, pero de 2 instancias separadas
+            $freshFlight = $flight->fresh();
+        </pre>
+        <p class="description">
+            El metodo <span class="functions">refresh</span> va a "re hidratar" el modelo existente usando data fresca de la base de datos
+            , adicionalmente, todas sus relaciones van a ser refrescadas tambien, ¿Que es re hidratar?
+            basicamente, que liberaras de memoria cualquier cambio hecho en el modelo y se remplazara
+            con datos actuales de la DB ( los existentes ahora, a su vez que re recarga las relaciones )
+
+            <ul class="u-list">
+                <li>
+                    Rehidratas el modelo: si has realizado cambios en los atributos de un modelo
+                                        PERO AUN NO LOS HAS GUARDADO EN LA DB, esos cambios se perderan
+                                        y el modelo se actualizara con los datos actuales de la base de datos
+                </li>
+            </ul>
+        </p>
+        <pre class="code">
+
+            // Supongamos que tenemos un usuario con ID 1
+            $user = User::with('posts')->find(1);
+
+            // Realizamos algunos cambios en el usuario en la memoria
+            $user->name = 'Nuevo Nombre';
+
+            // Cambiamos un atributo de uno de los posts relacionados en la memoria
+            $user->posts[0]->title = 'Nuevo Título';
+
+            // Al usar el método refresh, se descartan los cambios en memoria
+            $user->refresh();
+
+            // El nombre del usuario vuelve a su valor original de la base de datos
+            echo $user->name; // Mostraría el nombre original del usuario
+
+            // El título del primer post relacionado vuelve a su valor original de la base de datos
+            echo $user->posts[0]->title; // Mostraría el título original del primer post
+        </pre>
+        <p class="description">
+            <span class="functions">refresh</span> es muy util cuando quieres "deshacer cambios" ya que afecta tanto al modelo en si como los
+             cambios hechos en las relaciones del modelo.
+        </p>
+
+        <h4 class="sub--subtitule"><span id="hash">#</span>Collecciones</h4>
+        <p class="description">
+            como vimos, los metodos <span class="functions">all</span> y <span class="functions">get</span>
+            recuperan multiples registros de tu tabla, pero, estos metodos NO RETORNAN un array plano de PHP,
+            mas bien, devuelven una inctancia de <span class="functions">Illuminate\Support\Collection </span>
+            , esta clase provee muchos metodos utiles para tratar arreglos ( las collecciones son arrays por dentro )
+            , por ejemplo el metodo <span class="functions">reject</span> puede ser usado para remover
+            modelos de una colleccion basado en el return de un clousure ( true or false )
+        </p>
+
+        <pre class="code">
+
+            $flights = Flight::where('destination', 'Paris')->get();
+ 
+            $flights = $flights->reject(function (Flight $flight) {
+                return $flight->cancelled;
+            });
+        </pre>
+        <p class="description">
+            Primero, recuperas TODOS los modelos donde en la columna destination
+            tenga el valor de "Paris", ahora bien... despues los vas a filtrar con el metodo
+            <span class="functions"> reject </span>, permitiendote mandar un clousure como argumento
+            ( en laravel los clousure son como funciones anonimas de JS ), entonces indicas que, "de todo lo que obtuviste
+            ahora lo vas a filtrar" si la columna cancelled del modelo es true retornara el registro y lo guardara en la variable $flighs, si es false lo saltara,
+            osea.. tendras TODOS los vuelos cancelados
+        </p>
+        <p class="description">
+            Como todas las collecciones implementan por dentro una interfaz de Iterables, puedes iterar la colleccion como
+            si fuera un array nativo
+        </p>
+        <pre class="code">
+
+            foreach ($flights as $flight) {
+                echo $flight->name;
+            }
+        </pre>
+
+        <h4 class="subtitule"><span id="hash">#</span>Chunkeando Resultados</h4>
+        <p class="description">
+            Tu aplicacion se puede quedar sin memoria si tratas de guardar en una variable DEMASIADOS DATOS,
+            imagina que tienes una consulta que te trae 6000 usuarios con 16 columnas y aparte miles de relaciones....
+            para estos casos existen 3 metodos que te ayudan a tratar cantidades MASIVAS de datos
+            <ul class="u-list">
+                <li>chunk</li>
+                <li>lazy</li>
+                <li>cursor</li>
+            </ul>
+        </p>
+        <h4 class="sub--subtitule"><span id="hash">#</span>Chunk</h4>
+        <p class="description">
+            El metodo  <span class="functions">chunk</span> es usado para procesar UN GRAN NUMERO DE MODELOS de manera eficiente
+            , el metodo <span class="functions">chunk</span> recupera N cantidad de modelos del total, osea, si traes 6000 modelos, puedes indicar a chunk
+            que trabaje por lotes de 50, osea, traera CHUNKS DE 50, los tratara, los liberara de memoria y traera otros 50, asi hasta llegar a 
+            6000
+        </p>    
+        <pre class="code">
+            use App\Models\Flight;
+            use Illuminate\Database\Eloquent\Collection;
+            
+            Flight::chunk(200, function (Collection $flights) {
+                foreach ($flights as $flight) {
+                    // ...
+                }
+            });
+        </pre>
+        <p class="description">
+            Cuando usas <span class="functions">chunk</span> de esta manera, indicas que quieres tratar TODOS los registros que contiene 
+            la tabla de este modelo y en cantidades de 200
+
+            chunk recibe 2 argumentos en su contructor
+
+            <ul class="u-list">
+                <li>1.- la cantidad de modelos que tratara por CHUNK ( por set )</li>
+                <li>2.- un clousure el cual se ejecutara en los modelos recuperados en el chunk ( OJO en los 200 modelos, si quieres tratar 1 a 1 deberas iterarlos como en el ejemplo )</li>
+            </ul>
+        </p>
+        <p class="description">
+            Si necesitas FILTRAR los resultados del metodo <span class="functions">chunk</span> basado en una columna que tambien
+            deseas actualizar mientras iteras sobre cada modelo del chunk... debes usar el metodo
+            <span class="functions">chunkById</span>, ya que, usar solo el metodo chunk para este escenario puede darte problemas y comportamientos
+            raros. internamente <span class="fucntions">chunkById</span> siempre va a recuperar modelos con un id mayor que el ultimo modelo en el chunk previo!
+            ( en español, este metodo buscara por primary key el regsitro y siempre te traera una primary key SUPERIOR a el anterior modelo tratado ).
+        </p>
+        <pre class="code">
+
+            Flight::where('departed', true)
+                ->chunkById(200, function (Collection $flights) {
+
+                    $flights->each->update(['departed' => false]);
+                    
+                }, $column = 'id');
+        </pre>
+
+        <h4 class="subtitule"><span id="hash">#</span>Chunkeando usando Lazy Collections</h4>
+        <p class="description">
+            el metodo <span class="functions">lazy</span> es similar al metodo chunk, en el sentido de que
+            detras del escenas, igualmente ejecuta la query en LOTES, pero, en este metodo lazy, en vez de mandar los chunks en un callback ( clousure )
+            , el metodo lazy retorna una <span class="functions">LazyCollection</span> aplanada de modelos <del>
+            eloquent, asi puedes interactuar con cada modelo de una forma mas simplificada
+        </p>
+        <pre class="code">
+
+            use App\Models\Flight;
+ 
+            foreach (Flight::lazy() as $flight) {
+                // ...
+            }
+        </pre>
+        <p class="description">
+            Al igual que <span class="functions">chunkById</span> existe <span class="functions">lazyById</span>
+            el cual te permite recuperar modelos con un id ( primary key ) superior al ultimo tratado
+        </p>
+
+        <pre class="code">
+
+            Flight::where('departed', true)
+            ->lazyById(200, $column = 'id')
+            ->each->update(['departed' => false]);
+        </pre>
+
+        <h4 class="subtitule"><span id="hash">#</span>Cursors ( Cursores )</h4>
+        <p class="description">
+            Similar al metodo lazy, <span class="functions">cursor</span> es un metodo que se usa
+            para manipular datos de manera MASIVA, reduciendo el uso en memoria de las cosas en php
+            , el metodo cursos SOLO ejecuta 1 query, pero, los modelos nos eran hidratados hasta que se itere
+            ( osea no se convertiran en instancias de Model hasta que sea su turno )
+
+            la ventaja de esto es que va 1 por 1 y lo va liberando de memoria, entonces ejecuta y suelta, ejecuta y suelta...
+
+
+        </p>
+        <h4 class="sub--subtitule"><span id="hash">¿ Problemas de cursores?</span></h4>
+        <p class="description">
+            La desventaja es que este metodo al solo cargar 1 modelo a la vez.. no puedes cargar sus relaciones
+            , para esos caso mejor usa lazy
+        </p>
+        <p class="description">
+            el emtodo cursor retorna una intancia de 
+            <span class="fucntions">Illuminate\Support\LazyCollection</span>
+            por lo cual, puedes usar metodos de collecciones mientras solo
+             almazenas 1 modelo en memoria a la vez!
+        </p>
+
+        <pre class="code">
+
+            use App\Models\User;
+ 
+            $users = User::cursor()->filter(function (User $user) {
+                return $user->id > 500;
+            });
+            
+            foreach ($users as $user) {
+                echo $user->id;
+            }
+        </pre>
+        <p class="description">
+            NOTA!, aunque cursor hace un trabajo optimos... igualmente puede quedarse sin memoria PHP
+
+            debido a que el PDO Driver de PHP internamente atrapa en su buffer todos lso raw query
+            ( llenando el buffer en consultas largisimas ), ene stos casos de nuevo se aconseja lazy
+        </p>
+        <h4 class="subtitule"><span id="hash">#</span>Subqueries AVANZADAS</h4>
+        <h4 class="sub--subtitule"><span id="hash">#</span>Subquery Selects</h4>
+        <p class="description">
+            Laravel te da soporte para subqueries avanzadas, permitiendote traer informacion de multiples tablas relacionada! ( vamos, te permite hacer inner joins )
+    
+        </p>
+        <pre class="code">
+    
+            use App\Models\Destination;
+            use App\Models\Flight;
+            
+            return Destination::addSelect(['last_flight' => Flight::select('name')
+                ->whereColumn('destination_id', 'destinations.id')
+                ->orderByDesc('arrived_at')
+                ->limit(1)
+            ])->get();
+        </pre>
+    
+        <p class="description">
+            Como ves aqui, estas trayendo todos los campos de Destination y con addSelect le agregas 1 columna, lo que contendra
+            dicha columna es lo que se busque de OTRA TABLA que ene ste casos erie el name donde 
+            destination_id sea igual al modelo destinations columna id!, debe haber un tema gigante de esto, lod ejaremos en su 
+            seccion
+        </p>
+    
+        <h4 class="sub--subtitule"><span id="hash">#</span>Subquery Ordering</h4>
+        <p class="description">
+            ademas, la funcion <span class="fucntions">OrderBy</span> soporta el uso de subqueries
+        </p>
+        <pre class="code">
+    
+            return Destination::orderByDesc(
+                Flight::select('arrived_at')
+                    ->whereColumn('destination_id', 'destinations.id')
+                    ->orderByDesc('arrived_at')
+                    ->limit(1)
+            )->get();
+        </pre>
+
+
+        <h4 class="sub--subtitule"><span id="hash">#</span>Recuperando 1 modelo / agregados</h4>
+
+        <p class="description">
+            ademas de recuperar todo con <span class="functions">all</span> tambien puedes recuperar solo 1 modelo ( en evz de la colleccion )
+            con metodos como 
+            <span class="functions">find</span>
+            <span class="functions">first</span>
+            <span class="functions">firstWhere</span>
+        </p>
+
+        <pre class="code">
+            
+            use App\Models\Flight;
+            
+            // Retrieve a model by its primary key...
+            $flight = Flight::find(1);
+            
+            // Retrieve the first model matching the query constraints...
+            $flight = Flight::where('active', 1)->first();
+            
+            // Alternative to retrieving the first model matching the query constraints...
+            $flight = Flight::firstWhere('active', 1);
+        </pre>
+
+        <p class="description">
+                ADEMAS, tienes metodos como 
+                <span class="functions">findOr</span> o 
+                <span class="functions">firstOr</span>
+
+                los cuales te permiten hacer algo al encontrar un modelo y si no
+                lo encuentran, entonces ejecutar cierta logica ! ( esto se ejecuita en un clousure )
+
+        </p>
+        <pre class="code">
+
+            $flight = Flight::findOr(1, function () {
+                // ...
+            });
+             
+            $flight = Flight::where('legs', '>', 3)->firstOr(function () {
+                // ...
+            });
+        </pre>
+
+        <h4 class="sub--subtitule"><span id="hash">#</span>Excepcciones NOT FOUND</h4>
+        <p class="description">
+            alguna veces desearas tirar un error de excepccion cuando no encuentras un modelo en tu DB
+            ( util en controladores y rutas ), para esto laravel nos da 2 metodos
+
+            <span class="functions">findOrFail</span> y 
+            <span class="functions">firstOrFail</span>
+
+            estos emtodos recuperaran el primer resultador de la query, si no encuentra x cosa,
+            se retornara un error de tipo <span class="functions">Illuminate\Database\Eloquent\ModelNotFoundExeption</span>
+            
+            sie ste error noe s atrapado en un try catch.... se devolvera entonces una respuesta 404 al cliente
+        </p>
+
+        <pre class="code">
+
+            $flight = Flight::findOrFail(1);
+ 
+            $flight = Flight::where('legs', '>', 3)->firstOrFail();
+
+
+            // Demostracion de errores en una ruta
+            use App\Models\Flight;
+ 
+            Route::get('/api/flights/{id}', function (string $id) {
+                return Flight::findOrFail($id);
+            });
+
+        </pre>
+
+        <h4 class="subtitule"><span id="hash">#</span>Recuperando O creando modelos</h4>
+        <p class="description">
+            igual tienes emtodos para buscar o crear un modelo, en este caso son
+            <span class="functions">firstOrNew</span>
+            <span class="functions">firstOrCreate</span>
+
+            hay diferencias clave, para firstOrCreate lo que hace es buscar en base a una columna
+            en su priemer argumento ( o una serie de columnas si le mandas un array de keys values)
+            si no encuentra nada... entonces CREA el modelos mergeando el arg 1 y el arg2 ( que son arrays de atributos )
+
+            para firstOrNew, este en vez de crear directamente el modelo en la tabla, mas bien RETORNA una instancia
+            para que puedas manioularla antes de guardarla!
+        </p>
+
+        <pre class="code">
+            use App\Models\Flight;
+ 
+            // Retrieve flight by name or create it if it doesn't exist...
+            $flight = Flight::firstOrCreate([
+                'name' => 'London to Paris'
+            ]);
+            
+            // Retrieve flight by name or create it with the name, delayed, and arrival_time attributes...
+            $flight = Flight::firstOrCreate(
+                ['name' => 'London to Paris'],
+                ['delayed' => 1, 'arrival_time' => '11:30']
+            );
+            
+            // Retrieve flight by name or instantiate a new Flight instance...
+            $flight = Flight::firstOrNew([
+                'name' => 'London to Paris'
+            ]);
+            
+            // Retrieve flight by name or instantiate with the name, delayed, and arrival_time attributes...
+            $flight = Flight::firstOrNew(
+                ['name' => 'Tokyo to Sydney'],
+                ['delayed' => 1, 'arrival_time' => '11:30']
+            );
+        </pre>
+        <p class="description">
+            Dependiendo de si le mandas 1 argumento o 2, cambiara un poco el comportamiento de esta funcion!
+        </p>
+        <h4 class="subtitule"><span id="hash">#</span>Recuperando AGREGADOS</h4>
+
+        <p class="description">
+            Cuando interactuas con modelos de eloquent, tambien puedes usar las funciondes de AGREGADOS, que son
+            <span class="code">count</span>
+            <span class="code">sum</span>
+            <span class="code">max</span>
+             y mas!, hay mucha sy tienen otra seccion dedicada
+        </p>
+        <pre class="code">
+
+            $count = Flight::where('active', 1)->count();
+ 
+            $max = Flight::where('active', 1)->max('price');
+        </pre>
+
+
+        <h4 class="subtitule"><span id="hash">#</span>Insertando y Actualizando MODELOS</h4>
+        <h4 class="sub--subtitule"><span id="hash">#</span>Inserciones </h4>
+        <p class="description">
+
+            Ademas de obtener registros, puedes AGREGAR registros... la idea aqui es que
+            <ul class="u-list">
+                <li>1.- Generas una instancia del modelo</li>
+                <li>2.- asignas los atributos al modelo</li>
+                <li>3.- llamas el metodo <span class="fucntions">save</span></li>
+            </ul>
+        </p>
+        <pre class="code">
+
+            $flight = new Flight;
+ 
+            $flight->name = $request->name;
+     
+            $flight->save();
+     
+            return redirect('/flights');
+        </pre>
+        <p class="description">
+            En este ejemplo asignamos el nombre al modelo y luego lo guardamos 
+            con el metodo save() ( usado en la instancia del modelo generada )
+
+            cuando usas save, el comportamiento de los timestamps ( created_at y updated_at ) 
+            se ejecutara en automatico
+        </p>
+        <p class="description">
+            Adicionalmente tienes el metodo 
+            <span class="functions">create</span>
+            , ¿diferencia?, este metodo hace save del modelo
+            y retorna la instancia del modelo generada para que puedas 
+            hacer lo que gustes con ella
+        </p>
+
+        <pre class="code">
+
+            use App\Models\Flight;
+ 
+            $flight = Flight::create([
+                'name' => 'London to Paris',
+            ]);
+        </pre>
+
+        <p class="description">
+            PERO, antes de que puedas usar el metodo create, vas a necesitar habilitar una propiedad en tu modelo
+            dodne deses crear regsitros, esta propiedad es 
+            <span class="fucntions">fillable</span> o 
+            <span class="fucntions">guarded</span>
+
+            estas propiedades son REQUERIDAS ebido a que todos los modelos de eloquent estan protegidos 
+            de los "asignamientos masivos", para que esta vulnerabilidad nos ea explotada, debes activar manualmente el comportamiento
+            ( existe una seccion de esto igual )
+        </p>
+
+        <h4 class="sub--subtitule"><span id="hash">#</span>Updates ( Actualizaciones ) </h4>
+        <p class="description">
+
+            el emtodo save puede ser usado igualmente para actualizar modelos, solo debes
+            recuperar el modelo, modificarlo y ejecutar save
+        </p>
+
+        <pre class="code">
+
+            use App\Models\Flight;
+ 
+            $flight = Flight::find(1);
+            
+            $flight->name = 'Paris to London';
+            
+            $flight->save();
+        </pre>
+        <p class="description">
+            y al igual que finrOr , tienes 
+            <span class="functions">updateOrCreate</span>
+        </p>
+        <pre class="code">
+
+            $flight = Flight::updateOrCreate(
+                ['departure' => 'Oakland', 'destination' => 'San Diego'],
+                ['price' => 99, 'discounted' => 1]
+            );
+        </pre>
+
+        <h4 class="sub--subtitule"><span id="hash">#</span>Mass Updates</h4>
+        <p class="description">
+            tambien puedes hacer UPDATES MASIVOS, comor esultadod e una query gracias al metodo
+            <span class="functions">Updates</span>
+
+            en el siguiente ejemplo vas a hacer UPDATE en todos los regsitros que cumplan la condicion,
+             del modelo
+        </p>
+        <pre class="code">
+
+            Flight::where('active', 1)
+            ->where('destination', 'San Diego')
+            ->update(['delayed' => 1]);
+        </pre>
+        <p class="description">
+            El metodo Update espera un array de columnas que va a actualizar y sus valores, ademas, 
+            te retornara el numero de registros actualziados!
+
+            NOTA: cuando emites actualziaciones masivas con eloquent... los siguientes eventos
+            de modelos ( se vera mas adelante que es un evento ) NO SERAN EJECUTADOS
+            <ul class="u-list">
+                <li>Evento saving</li>
+                <li>Evento saved</li>
+                <li>Evento updating</li>
+                <li>Evento updated</li>
+            </ul>
+
+            esto pasa porque cuando haces updates masivos, NUNCA ESTAS RECUPERANDO EL MODELO EN SI
+        </p>
+
+        <h4 class="sub--subtitule"><span id="hash">#</span>Examinando cambios de atributos</h4>
+
+        <p class="description">
+            eloquent te da los metodos
+            <span class="functions">isDirty</span>
+            <span class="functions">isClean</span>
+            <span class="functions">wasChanged</span>
+
+            para examinar el estado internos de modelos de eloquent y determinar como los atributos
+            han cambiado desde que se recupero el modelo original
+
+            <ul class="u-list">
+                <li> <span class="functions">isDirty</span>: determina si un aitributo del modelo cambio o si TODOS LOS ATRIUBTOS
+                    del modelo cambiaron, depende como lo uses
+                </li>
+                <pre class="code">
+
+                    use App\Models\User;
+ 
+                    $user = User::create([
+                        'first_name' => 'Taylor',
+                        'last_name' => 'Otwell',
+                        'title' => 'Developer',
+                    ]);
+                    
+                    $user->title = 'Painter';
+                    
+                    $user->isDirty(); // true
+                    $user->isDirty('title'); // true
+                    $user->isDirty('first_name'); // false
+                    $user->isDirty(['first_name', 'title']); // true
+                </pre>
+
+                <li>
+                    <span class="functions">isClean</span>:
+                    determina si un atributo del modelo ha cambiado o uno en espesifico ( es lo contrario a
+                    is dirty ) 
+                    <pre class="code">
+                        use App\Models\User;
+ 
+                        $user = User::create([
+                            'first_name' => 'Taylor',
+                            'last_name' => 'Otwell',
+                            'title' => 'Developer',
+                        ]);
+                        
+                        $user->title = 'Painter';
+                        
+                         
+                        $user->isClean(); // false
+                        $user->isClean('title'); // false
+                        $user->isClean('first_name'); // true
+                        $user->isClean(['first_name', 'title']); // false
+                    </pre>
+                </li>
+                <li>
+                    <span>wasChanged</span>: este metodo si cualqueira de 
+                    los atributos fue cambiado cuando el modelo
+                    fue salvado! ( con save ) , tiene un alcanze del contexto de la actual
+                     request, osea, cuando el modelo se guarda, wasChanged puede deteriminar
+                      si alguna tributo cambio
+
+                      <pre class="code">
+
+                        $user = User::create([
+                            'first_name' => 'Taylor',
+                            'last_name' => 'Otwell',
+                            'title' => 'Developer',
+                        ]);
+                        
+                        $user->title = 'Painter';
+                        
+                        $user->save();
+                        
+                        $user->wasChanged(); // true
+                        $user->wasChanged('title'); // true
+                        $user->wasChanged(['title', 'slug']); // true
+                        $user->wasChanged('first_name'); // false
+                        $user->wasChanged(['first_name', 'title']); // true
+                      </pre>
+                </li>
+
+                <li>
+                    <span class="functions">getOriginal</span>: 
+                    este emtodo obtiene los atributos ORIGINALES de un modelo, osea, todo lo que cambies,
+                    podras recuperarlo!
+
+                    <pre class="code">
+                        $user = User::find(1);
+ 
+                        $user->name; // John
+                        $user->email; // john@example.com
+                        
+                        $user->name = "Jack";
+                        $user->name; // Jack
+                        
+                        $user->getOriginal('name'); // John
+                        $user->getOriginal(); // Array of original attributes...
+                    </pre>
+                </li>
+            </ul>
+        </p>
+
+        <h4 class="subtitule"><span id="hash">#</span>Asignamientos masivos</h4>
+
+        <p class="description">
+            Tu puedes usar el metodo <span class="functions"> create </span> para salvar un modelo!, pero, antes
+            de poder usar este metodo create en los modelos deberas habilitar el comportamientod e "Asignaciones masivas"
+            estod ebidoa  que existe una vulnerabilidad llamada "Mass assigment" la cual laravel te protege
+            , para habilitar esto ocupara definir las propiedades: 
+
+            <span class="functions">fillable</span> y 
+            <span class="functions">guarded</span>
+
+            definiendo cualquiera de estas dos, haras funcionar el mass assigment,
+        </p>
+
+        <h4 class="sub--subtitule"><span id="hash">#</span>¿ Que es la vulnerabilidad de asignacion masiva?</h4>
+
+        <p class="description">
+            Esta vulnerabilidad ocurre cuando un usuario desde el ladod el cliente ( navegador por ejemplo ) te crea un input
+            adicional con ela tributo name a una columna ( puede ser name="is_admin" ), entonces, como tiene un name
+            esta se recbe en tu controlador y se procesa al crear modelos, pudiendote cambiar valores en columnas
+
+            si te mandan el is_admin y tienes en tu tabla una columna llamada is_admin, peus te la cambiaran...
+
+            asi que, para no permitir esto, tu debes definir MANUALMENTE que atributos tiene tu modelo permitido alterar
+            y para esto se usa <span class="code">fillable</span>
+        </p>
+
+        <h4 class="sub--subtitule"><span id="hash">#</span> Definicion de fillable y guarded</h4>
+        <pre class="code">
+            
+            namespace App\Models;
+ 
+            use Illuminate\Database\Eloquent\Model;
+            
+            class Flight extends Model
+            {
+                /**
+                * The attributes that are mass assignable.
+                *
+                * @var array
+                */
+                protected $fillable = ['name'];
+            }
+        </pre>
+        <p class="description">
+            Como puedes ver, tu modelo ahora SOLO PERMITIRA que el atributo name de las tablas sea cambiado
+        </p>
+
+        <pre class="code">
+
+            $flight = Flight::create(['name' => 'London to Paris']);
+        </pre>
+
+        <p class="description">
+            Ahora bien!, si tu ya tienes una instancia de un modelo, puedes 
+            usar la funcion
+            <span class="functions">fill</span> para llenar modelos con atributos
+            
+            <pre class="code">
+
+                $user = User::find(1);
+
+                $user->fill([
+                    'name' => 'John Doe',
+                    'email' => 'john.doe@example.com',
+                    'password' => Hash::make('secretpassword'),
+                ]);
+                $user->save();
+            </pre>
+
+            NOTA! usar fill y asignar manualmente el valor ( $user->name = "mike" ) es lo mismo...
+            pero tiene una serie de detalles a tener en cuenta
+
+           <ul class="u-list">
+                <li>
+                    1.- hace el codigo mas limpio
+                    <pre class="code">
+
+                        //ESTO ES MAS LIMPIO
+                        $user->fill([
+                            'name' => 'John Doe',
+                            'email' => 'john.doe@example.com',
+                            'password' => Hash::make('secretpassword'),
+                        ])->save();
+                        
+
+
+
+                        // ESTO ES MAS SUCIO
+                        $user->name = 'John Doe';
+                        $user->email = 'john.doe@example.com';
+                        $user->password = Hash::make('secretpassword');
+                        $user->save();
+                    </pre>
+
+                </li>
+                <li>
+                    2.- cuando trabajas con formularios fill es util.. porque se encarga de asignar
+                    automaticamente todos los valores de la request al modelo ( solo llenando los fillable definidos en el modelo)
+                    <pre class="code">
+
+                        $user->fill($request->all())->save();
+                    </pre>
+                </li>
+           </ul>
+
+           tene n cuenta que fill SOLO LLENA el modelo, mas no lo crea ni salva en la tabla
+        </p>
+        <h4 class="sub--subtitule"><span id="hash">#</span> Asignacion masiva y columnas JSON</h4>
+        <p class="description">
+            por defecto, los atributos que no incullas en la propiedad <span class="functions"> $fillable </span>
+            de tus modelos, SERA SILENCIOSAMENTE DESCARTADA cuando realizes estas operaciones
+
+            durante produccion es lo que se espera, en local puede darte algunas confusiones
+            del tipo "porque este atributo no se esta asignando correctamente"
+        </p>
+        <h4 class="sub--subtitule"><span id="hash">#</span> Puedo definir que laravel me avise cuando se descartan atributos de manera silenciosa?</h4>
+        <p class="description">
+            claro papi, puedes decirle a laravel "tirame un error si estoy descartando silenciosamente algun atributo"
+            esto se hace configurando en el archivo AppServiceProvider en el metodo boot()
+            esta configuracion
+
+            <pre class="code">
+
+                use Illuminate\Database\Eloquent\Model;
+ 
+                /**
+                * Bootstrap any application services.
+                */
+                public function boot(): void
+                {
+                    Model::preventSilentlyDiscardingAttributes($this->app->isLocal());
+                }
+            </pre>
+            Como ves, usaras <span class="functions">preventSilentyDiscardingAttributes</span>
+            por cada modelo donde quieres este comportamiento
+
+            <h4 class="subtitule"><span id="hash">#</span>Upserts</h4>
+            <p class="description">
+                Un upsert es un metodo de modelos de eloquent que te permite actualziar o crear
+                registros en una simple opreacion atomica.. ( nani )
+
+                upsert es algo complejo, asi que iremos poco a poco:
+                
+                este metodos e usa para INSERTAR nuevos registros en una tabla o ACTUALIZAR los regsitros existentes en una
+                sola condicion, es una combinacion de insertar ( si el regsitro no existe )
+                 y actualizar ( si el registro ya existe), esto te permite hacer ambas operaciones en una sola
+                 consulta
+            </p>
+            <pre class="code">
+
+                // sintaxis basica
+                Model::upsert(
+                    array $values,
+                    array $uniqueBy,
+                    array $update
+                );
+            </pre>
+
+            <p class="description">
+
+                <ul class="u-list">
+                    <li> <span class="functions">$values</span>:
+                        un array de arrays con los datos que quieres insertar o actualizar
+                    </li>
+                    <li> <span class="functions">$uniqueBy</span>
+                        un array con los NOMBRES de las columnas que se usaran para determinar si
+                        un registro ya existe
+                    </li>
+                    <li> <span class="functions">$update</span> 
+                        un array con los nombres de las columnas que se actualizaran 
+                        si el registro ya existe
+                    </li>            
+                </ul>
+
+                complejo, pero te sirve para insertar y updatear al mismo tiempo... mejor haz codigo mas legible XD
+            </p>
+
+            <h4 class="subtitule"><span id="hash">#</span>Borrando MODELOS</h4>
+            <p class="description">
+                para borrar un modelo solo necesiats llamas al metodo <span class="functions"> delete</span>
+            </p>
+            <pre class="code">
+
+                use App\Models\Flight;
+ 
+                $flight = Flight::find(1);
+                 
+                $flight->delete();
+            </pre>
+            <p class="description">
+                Tambien puedes llamar al metodo <span class="functions">truncate</span>
+                 para borrar TODOS los regiistros de la tabla, trucnate va a resetear los
+                 ids autoincrementales! ( volviendo a empezar desde 0 )
+            </p>
+            <pre class="code">
+
+                Flight::truncate();
+            </pre>
+            <h4 class="sub--subtitule"><span id="hash">#</span>Borrando un modelo existente por su primary key</h4>
+            <p class="description">
+                en el ejemplo del metodo <span class="functions">delete</span>, primero llamamos al modelo ( con find ) y luego lo eliminamos,
+                pero, si conoces la llave primaria del modelo, puedes eliminar dicho registro
+                sin tener que recuperarlo primero. usando el metodo <span class="functions">destroy</span> 
+                . destroy puede aceptar:
+                <ul class="u-list">
+                    <li>una priamry key</li>
+                    <li>Multiples primary keys</li>
+                    <li>Un array de primary keys</li>
+                    <li>Una coleccion de primary keys</li>
+                </ul>
+            </p>
+
+            <pre class="code">
+
+                Flight::destroy(1);
+                
+                Flight::destroy(1, 2, 3);
+                
+                Flight::destroy([1, 2, 3]);
+                
+                Flight::destroy(collect([1, 2, 3]));
+            </pre>
+            <p class="description">
+                Debido a que destroy internamente usa el metodo <span class="functions">delete</span>
+                , <span class="functions">destroy</span> va a disparar los eventos de modelo
+                    <ul class="u-list">
+                        <li>deleting</li>
+                        <li>deleted</li>
+                    </ul>
+            </p>
+            <h4 class="sub--subtitule"><span id="hash">#</span>Borrando modelos usando queries</h4>
+            <p class="description">
+                tambien puedes eliminar modelos creando un query de eloquent. Como pasa con actualizaciones masivas
+                , borrar de forma massiva NO DISPARA los eventos del modelo ( debido nuevamente, a que no se esta recuperando la instancia del modelo )
+
+            </p>
+            <pre class="code">
+
+                $deleted = Flight::where('active', 0)->delete();
+            </pre>
+
+            <p class="description">
+                Al ejecutar una instrucción de eliminación masiva a
+                 través de Eloquent, los eventos de modelo de
+                eliminación y eliminación no se
+                distribuirán para los modelos eliminados. 
+                Esto se debe a que los modelos nunca se recuperan 
+                realmente al ejecutar la instrucción delete.
+            </p>
+
+            <h4 class="subtitule"><span id="hash">#</span>Soft Deleting ( Eliminacion temporal ) </h4>
+            <p class="description">
+                En vez de eliminaciones definitivas usando 
+                <span class="functions">delete</span> o 
+                <span class="functions">destroy</span> 
+                puedes hacer "eliminaciones temporales" de modelos, cuando haces uso de soft delete
+                en realidad, no estas eliminando registros de tu Base de datos, en lugar de eso, estas creando una columna extra 
+                en el registro llamada <span class="functions">deleted_at</span>, el cual es similar a los timestamps, pero, se activa
+                cuando borras un registro con soft delete asignando la fecha de elimninacion a el registro.
+            </p>
+            <p class="description">
+                Para activar la funcionalidad "Soft delete" 
+                en un modelo, solo necesitas usar
+                el Trait <span class="functions">Illuminate\Database\Eloquent\SoftDeletes</span> en
+                el modelo
+            </p>
+            <pre class="code">
+                 
+                namespace App\Models;
+                
+                use Illuminate\Database\Eloquent\Model;
+                use Illuminate\Database\Eloquent\SoftDeletes;
+                
+                class Flight extends Model
+                {
+                    use SoftDeletes;
+                }
+            </pre>
+            <p class="description">
+                Como nota extra, el trait <span class="functions">SoftDeletes</span>
+                va a asignar a la columna <span class="functions">deleted_at</span>
+                una instancia de <span class="functions">DateTime</span> / <span class="functions">Carbon</span> automaticamente.
+            </p>
+
+            <p class="description">
+                Ademas de agregar el trait al modelo, debes asignar en su respectiva migracion para crear dicha columna,
+                laravel tiene ya una columna definida para Soft Deletes que te ayudara.
+            </p>
+            <pre class="code">
+
+                //Migracion
+                use Illuminate\Database\Schema\Blueprint;
+                use Illuminate\Support\Facades\Schema;
+                
+                Schema::table('flights', function (Blueprint $table) {
+                    $table->softDeletes();
+                });
+                
+                Schema::table('flights', function (Blueprint $table) {
+                    $table->dropSoftDeletes();
+                });
+            </pre>
+            <p class="description">
+                Una vez hecho estas 2 cosas, ya podras usar la funcionalidad de Soft Delete en tus modelos.
+                , ahoa, cuando llames el metodo <span class="functions">delete</span> en tus modelos, ya no los eliminaras,
+                ahora asignaras una fecha a la columna <span class="functions">deleted_at</span>
+                 ( indicando la hora que se elimino ). Cuando hagas selects de registros, ahora no se incluiran modelos
+                 que tengan la columna deleted_at asignada.
+            </p>
+            <p class="description">
+                Para determinar si un registro fue "Soft deleteado" ( eliminado temporalmente ), puedes usar el metodo
+                <span class="functions">trashed</span>:
+            </p>
+            <pre class="code">
+
+                if ($flight->trashed()) {
+                    // ...
+                }
+            </pre>
+            <p class="decsription">
+
+
+            </p>
+            <h4 class="sub--subtitule"><span id="hash">#</span> Restaurando modelos donde se uso Soft Delete </h4>
+            <p class="description">
+                Hay ocaciones en las que buscaras restaurar un registro que fue eliminado son Soft Delete, para esto
+                usaremos el metodo <span class="functions">restore</span>, este metodo va a setear la columna
+                deleted_at del modelo en null 
+            </p>
+            <pre class="code">
+
+                $flight->restore();
+            </pre>
+            <p class="description">
+                Ademas puedes utilizar el metodo <span class="functions">restore</span>
+                en queries para restaurar multiples registros
+
+                DENUEVO, como en otras "Asignaciones masivas", el metodo restore NO va a emitir los eventos del modelo ( de nuevo, porque
+                no se esta recuperando la instancia del modelo )
+            </p>
+            <pre class="code">
+
+                Flight::withTrashed()
+                        ->where('airline_id', 1)
+                        ->restore();
+            </pre>
+            <p class="description">
+                el metodo restore tambien puede ser usado cuanto haces relaciones de modelos
+            </p>
+            <pre class="code">
+                $flight->history()->restore();
+            </pre>
+
+            <h4 class="sub--subtitule"><span id="hash">#</span> Borrando de manera permanente modelos con "soft delete" </h4>
+            <p class="description">
+                Aveces, vas a querer eliminar definitivamente un modelo o conjunto de modelos, para esta operacion
+                usaras el metodo <span class="functions">forseDelete</span> e igualmente puedes usarlo al construir relaciones
+                de eloquent ( lo veremos mas a detalle despues )
+            </p>
+            <pre class="code">
+
+                $flight->forceDelete();
+
+
+                $flight->history()->forceDelete();
+            </pre>
+
+            <h4 class="subtitule"><span id="hash">#</span> Querying Modelos con soft delete </h4>
+            <h4 class="sub--subtitule"><span id="hash">#</span> Incluir modelos eliminados temporalmente </h4>
+            <p class="description">
+                Como vimos antes, los modelos eliminados con soft delete seran excluidos en automatico de las queryes
+                ( osea al recuperar registros con <span class="functions">get</span> o <span class="functions">all</span> )
+
+                pero, puedes FORZAR que se recuperen estos elementos usando la funcion 
+                <span class="functions">withTrashed</span>
+            </p>
+            <pre class="code">
+
+                use App\Models\Flight;
+ 
+                $flights = Flight::withTrashed()
+                                ->where('account_id', 1)
+                                ->get();
+            </pre>
+            <p class="description">
+                Ademas, puedes usar withTrashed en relaciones
+            </p>
+            <pre class="code">
+
+                $flight->history()->withTrashed()->get();
+            </pre>
+
+            <h4 class="sub--subtitule"><span id="hash">#</span> Recuperando SOLO modelos eliminados </h4>
+            
+            <p class="description">
+                el metodo <span class="functions">onlyTrashed</span> SOLO recuperara registros que 
+                fueron eliminados 
+            </p>
+            <pre class="code">
+
+                $flights = Flight::onlyTrashed()
+                            ->where('airline_id', 1)
+                            ->get();
+            </pre>
+
+            <h4 class="subtitule"><span id="hash">#</span>Pruning Models ( Eliminacion de registros antiguos de manera periodica )</h4>
+            <p class="description">
+                Esta funcionalidad es bastante buena, ya que, te permite eliminar 
+                registros de la base de datos de manera periodica y automatica.
+
+                puedes indicar que registros que superen 30 dias sean eliminados, manteniendo la tabla a largo plazo.
+
+                para lograr podemos usar alguno de estos 2 traits
+
+                <ul class="u-list">
+                    <li>
+                        <span class="functions">Illuminate\Database\Eloquent\Prunable</span>
+                    </li>
+                    <li>
+                        <span class="functions">Illuminate\Database\Eloquent\MassPrunable</span>
+                    </li>
+                </ul>
+            </p>
+
+            <p class="description">
+                Despues de añadir alguno de estos traits al modelo ( solo uno ), 
+                implementaras una funcion en el modelo llamada
+                 <span class="functions">Prunable</span>.
+
+                 este metodo retornara un Eloquent Query Builder que resuelve los modelos que no se necesitaran más
+            </p>
+
+            <pre class="code">
+                 
+
+                namespace App\Models;
+                
+                use Illuminate\Database\Eloquent\Builder;
+                use Illuminate\Database\Eloquent\Model;
+                use Illuminate\Database\Eloquent\Prunable;
+                
+                class Flight extends Model
+                {
+                    use Prunable;
+                
+                    /**
+                    * Get the prunable model query.
+                    */
+                    public function prunable(): Builder
+                    {
+                        return static::where('created_at', '< =', now()->subMonth());
+                    }
+                }
+            </pre>
+            <p class="description">
+                <ul class="u-list">
+                    <li>
+                        now()->subMonth(): La expresión now()->subMonth() en Laravel se utiliza 
+                                            para obtener la fecha y hora actuales , 
+                                            despues,  restarle un mes.
+
+                    </li>
+                </ul>
+            </p>
+
+            <p class="description">
+                cuando marcas un modelo como <span class="fucntions">prunable</span>, tambien podras definir
+                un metodo dentro del modelo llamado <span class="functions">pruning</span>, este metodo sera llamado antes de que el
+                modelo sea eliminado. este metodo es utilr para eliminar otros recursos relacionados con el modelo o hacer
+                cualquier otra accion que gustes.
+            </p>
+            <pre class="code">
+                /**
+                * Prepare the model for pruning.
+                */
+                protected function pruning(): void
+                {
+                    // ...
+                }
+            </pre>
+            <p class="description">
+                despues de configurar tu modelo con prunable, deberias programar el comando
+                de artisan <span class="functions">model:prune</span> en el archivo 
+                <span class="functions">routes/console.php</span> de tu aplicacion.
+
+                tu decides cada cuanto se ejecutara el prune ( aqui se configura cada que tiempo se ejecuta el prune )
+            </p>
+            <pre class="code" >
+
+                // console.php
+                use Illuminate\Support\Facades\Schedule;
+ 
+                Schedule::command('model:prune')->daily();
+            </pre>
+
+            <p class="description">
+                detras de escenas, el comando model:prune va a detectar los 
+                modelos configurados con "Prunable" dentro del directorio 
+                <span class="functions">app/Models</span>. si tus modelos estan en una localicacion diferente
+                puedes usar la bandera --model para espesificar los ClassNames
+            </p>
+            <pre class="code">
+
+                Schedule::command('model:prune', [
+                    '--model' => [Address::class, Flight::class],
+                ])->daily();
+            </pre>
+            <P class="description">
+                Por otra parte, si deseas exluir algunos modelos que son prunable de esta operacion, puedes pasar la bandera
+                <span class="functions">--except</span>
+            </P>
+            <pre class="code">
+
+                Schedule::command('model:prune', [
+                    '--except' => [Address::class, Flight::class],
+                ])->daily();
+            </pre>
+
+            <p class="description">
+                ADICIONALMENTE, puedes testear lo que se hara sin afectar a tus registros ( osea testear el prune )
+                gracias a la bandera <span class="functions"> --pretend</span>, cuando usas esta bandera,
+                simplemente se te dara un reporte de la cantidad de registros que seran afectados con prune si el comando
+                se corriera
+            </p>
+
+            <pre class="code">
+
+                php artisan model:prune --pretend
+            </pre>
+            <p class="description">
+                OJO, los modelos donde se aplico Soft Delete van a ser permanentemente eliminados 
+                <span class="functions">se les aplicara un forceDelete</span> si estos matchean con el query prune
+            </p>
+
+            <h4 class="subtitule"><span id="hash">#</span> Pruning masivos </h4>
+            <p class="description">
+                Aquie hablaremos del otro trait llamado <span class="functions">MassPrunable</span>
+                , cuando usas este trait en tus modelos, tus modelos seran ELIMINADOS de la base de datos usando
+                queries de eliminacion masivas.
+
+                por lo tanto, igual que pasa en cualquier cosa que hagas de forma masiva en laravel...
+                <span class="functions"> el Metodo pruning no sera invocado, TAMPOCO se invocaran los eventos deleting
+                    y deleted
+                </span>
+                de nuevo, porque los modelos nunca estan siendo recuperados realmente antes de la eliminacion, esto hace
+                el proceso de puning mucho mas eficiente y rapido.
+            </p>
+            <pre class="code">
+
+                class Flight extends Model
+                {
+                    use MassPrunable;
+                
+                    /**
+                    * Get the prunable model query.
+                    */
+                    public function prunable(): Builder
+                    {
+                        return static::where('created_at', '<=', now()->subMonth());
+                    }
+                }
+            </pre>
+
+            <h4 class="subtitule"><span id="hash">#</span> Replicando Modelos </h4>
+            <p class="description">
+                Tu puedes crear una copia sin salvar de cualquier instancia de modelo 
+                existente usando el metodo <span class="functions">replicate</span>,
+                este metodo es util cuando tienes instancias de modelos que comparten 
+                muchos de sus atributos
+            </p>
+            <pre class="code">
+
+                use App\Models\Address;
+ 
+                $shipping = Address::create([
+                    'type' => 'shipping',
+                    'line_1' => '123 Example Street',
+                    'city' => 'Victorville',
+                    'state' => 'CA',
+                    'postcode' => '90001',
+                ]);
+                
+                $billing = $shipping->replicate()->fill([
+                    'type' => 'billing'
+                ]);
+                
+                $billing->save();
+            </pre>
+            <p class="description">
+                como ves, replicas el modelo y asignas los atributos de este a 
+                la variable billing, y updateando la propiedad type a billing
+            </p>
+
+            <h4 class="subtitule"><span id="hash">#</span> Query Scopes</h4>
+            <h4 class="sub--subtitule"><span id="hash">#</span> Global Scopes</h4>
+            <p class="description">
+                Global scopes te permite añadir reglas a TODOS TUS QUERIES de X modelo,
+                la funcionalidad de <span class="functions">soft delete</span> usa Global Scopes
+                para solo recuperar "registros no borrados" de modelos.
+
+                un Global scope es muy util cuando quieres definir una regla 
+                a todas las queries de X modelo
+            </p>
+
+            <h4 class="sub--subtitule"><span id="hash">#</span>Generando Scopes</h4>
+            <p class="description">
+                Para generar un nuevo scope global, puedes invocar el comandod e artisan 
+                <span class="functions">make:scope</span>
+                el cual va a generar una clase de tipo scope en el directorio  
+                <span class="functions"> app/Models/Scopes </span>
+            </p>    
+            <pre class="code">
+
+                php artisan make:scope AncientScope
+            </pre>
+        
+            <h4 class="sub--subtitule"><span id="hash">#</span>Escribiendo scopes globales</h4>
+            <p class="description">
+                Escribir un scope global es sencillo, primero, usa el comando de artisan
+                <span class="functions">make:scope</span> para generar una clase que implemente
+                la interfaz <span class="functions">Iluminate\Database\Eloquent\Scope</span>
+            </p>
+
+            <p class="description">
+                la interfaz <span class="function">scope</span> requiere que implementes un metodo llamado
+                <span class="functions">apply</span>. este metodo va a añadir reglas a tu query ( puede ser cualquier regla, depende tus necesidades )
+        
+            </p>
+            <pre class="code">
+
+                 
+                namespace App\Models\Scopes;
+                
+                use Illuminate\Database\Eloquent\Builder;
+                use Illuminate\Database\Eloquent\Model;
+                use Illuminate\Database\Eloquent\Scope;
+                
+                class AncientScope implements Scope
+                {
+                    /**
+                    * Apply the scope to a given Eloquent query builder.
+                    */
+                    public function apply(Builder $builder, Model $model): void
+                    {
+                        $builder->where('created_at', '<', now()->subYears(2000));
+                    }
+                }
+            </pre>
+            <p class="description">
+                Como ves, estas aqui CREANDO un scope global que trae registros
+                menores a la fecha calculada actual menos 2000 años
+            </p>
+            <p class="description">
+                Nota adicional!, si tu scope global esta AÑADIENDO columnas 
+                a una clausula de tipo select de la query, seberias tu usar el metodo 
+                <span class="functions">addSelect</span> en vez de usar 
+                <span class="functions">select</span>
+
+                esto prevenira el remplazo no intencionado del select query actual
+            </p>
+
+            <h4 class="sub--subtitule"><span id="hash">#</span>Aplicando Global Scopes</h4>
+            <p class="description">
+                Para aplicar un Global scope a un modelo, simplemente debes definir el atributo
+                que apunte a el modelo de esta manera... 
+                <span class="functions">$copedBy</span>
+
+            </p>
+            <pre class="code">
+
+                namespace App\Models;
+ 
+                use App\Models\Scopes\AncientScope;
+                use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+                
+                #[ScopedBy([AncientScope::class])]
+                class User extends Model
+                {
+                    //
+                }
+            </pre>
+            <p class="description">
+                NOTA esta es la manera de laravel 11x en laravel 9 ( donde esta trabajando proyectos antiguos )
+                , la cosa cambia, de todas maneras, la idea no es que interiorices formas EXACTAS solo que sepas que se puede hacer, luego buscas la documentacion 
+                y sera ams facil encontrar y entender que vas a hacer
+
+            </p>
+            <p class="description">
+                Si deseas MANUALMENTE registrar el scope global, solo debes de sobrescribir el metodo
+                <span class="functions">booted</span> del modelo e invocar dentro de este
+                el metodo static <span class="functions">addGlobalScope</span>,
+                este metodo acepta una instancia de tu scope como unico argumento
+            </p>
+            <pre class="code">
+
+                namespace App\Models;
+ 
+                use App\Models\Scopes\AncientScope;
+                use Illuminate\Database\Eloquent\Model;
+                
+                class User extends Model
+                {
+                    /**
+                    * The "booted" method of the model.
+                    */
+                    protected static function booted(): void
+                    {
+                        static::addGlobalScope(new AncientScope);
+                    }
+                }
+            </pre>
+            <p class="description">
+                Una vez realizado esto, habras registrado en el modelo el scope global, ahora, cuando hagas queryes del tipo
+                <span class="functions">User::all()</span>, llamaras a una query como esta
+            </p>
+            <pre class="code">
+
+                select * from `users` where `created_at` < 0021-02-18 00:00:00
+            </pre>
+
+            <h4 class="sub--subtitule"><span id="hash">#</span>Scopes globales anonimos</h4>
+            <p class="description">
+                Eloquent te oernite definir global scopes desde el mismo modelo mediante un clousure
+                , esto con el objetivo de no crear una clase aparte.
+
+                el metodo que usaras es <span class="functions">addGlobalScope</span> y como primer
+                argumento recibira el nombre del scope
+            </p>
+            <pre class="code">
+
+                namespace App\Models;
+ 
+                use Illuminate\Database\Eloquent\Builder;
+                use Illuminate\Database\Eloquent\Model;
+                
+                class User extends Model
+                {
+                    /**
+                    * The "booted" method of the model.
+                    */
+                    protected static function booted(): void
+                    {
+                        static::addGlobalScope('ancient', function (Builder $builder) {
+                            $builder->where('created_at', '<', now()->subYears(2000));
+                        });
+                    }
+                }
+            </pre>
+
+            <h4 class="sub--subtitule"><span id="hash">#</span>removiendo los Global Scopes</h4>
+            <p class="description">
+                si tu quieres eliminar el comportamientod efinido en un Global Scope para que no afecte X query que 
+                deseas hacer, puedes hacer uso del metodo
+                <span class="fucntions">withoutGlobalScope</span>, este metodo solo acepta un argumento, y es ,
+                el class name del global scope que le asignaste al modelo.
+            </p>
+            <pre class="code">
+
+                User::withoutGlobalScope(AncientScope::class)->get();
+            </pre>
+
+            <p class="description">
+                pero, si tu definiste un Global scope al modelo mediante la sintaxis de clousure 
+                ( Global Scope Anonimo ), entocnes puedes pasar el nombre en string que asignaste a dicho scope.
+            </p>
+            <pre class="code">
+                
+                User::withoutGlobalScope('ancient')->get();
+            </pre>
+            <p class="description">
+                Adicionalmente, puedes remover TODOS los global scopes que tenga el modelo y X cantidad
+                de global scopes del modelo para que no afecten la consulta que deseas realizar.
+            </p>
+            <pre class="code">
+                
+                // Remove all of the global scopes...
+                User::withoutGlobalScopes()->get();
+                
+                // Remove some of the global scopes...
+                User::withoutGlobalScopes([
+                    FirstScope::class, SecondScope::class
+                ])->get();
+            </pre>
+        </section>
+        <section>
+            <h2 class="subtitule"><span id="hash">#</span>Local scopes</h2>
+            <p class="description">
+                Los local scopes te permiten definir en tu modelo un conjunto de "query constraints"
+                ( osea, reglas de queries ) que tu puedes facilmente re utilizar a lo largo de tu aplicacion.
+
+                por ejemplo, quiza necesites con frecuencia obtener todos los usuarios que son considerados populares.
+            </p>
+            <p class="description">
+                Para definir un scope local simplemente debes crear una funcion que se llame "scope" + "nombre".
+
+                todo lo que quieras que sea un metodo Scope solo debes agregar el prefix a la funcion de "scope"
+            </p>
+            <pre class="code">
+
+                namespace App\Models;
+ 
+                use Illuminate\Database\Eloquent\Builder;
+                use Illuminate\Database\Eloquent\Model;
+                
+                class User extends Model
+                {
+                    /**
+                    * Scope a query to only include popular users.
+                    */
+                    public function scopePopular(Builder $query): void
+                    {
+                        $query->where('votes', '>', 100);
+                    }
+                
+                    /**
+                    * Scope a query to only include active users.
+                    */
+                    public function scopeActive(Builder $query): void
+                    {
+                        $query->where('active', 1);
+                    }
+                }
+            </pre>  
+            <p class="description">
+                Un <span class="functions">scope</span> SIEMPRE DEBERIA retornar la misma instancia de query builder que recibe
+                o void
+            </p>
+
+            <h4 class="subtitule"><span id="hash">#</span>Utilizando un Local Scope</h4>
+            <p class="description">
+                una vez el scope ha sido definido, tu puedes llamar los metodos de scope
+                cuando estes realizando queries en los modelos.
+
+                OJO, al hacerlo, no incluyas la palabra scope al llamar al scope en si. y ademas, puedes
+                concatenar llamadas a scopes ( cada uno recibira la query que llevas hasta ese momento )
+            </p>
+            <pre class="code">
+                
+                use App\Models\User;
+ 
+                $users = User::popular()->active()->orderBy('created_at')->get();
+            </pre>
+            <p class="description">
+                Combinar multiples scopes cn el operador <span class="functions">or</span>
+                puede requerir que uses un clousure para lograr el correcto 
+                <span class="funcrions">logical grouping</span> 
+            </p>
+            <pre class="code">
+
+                $users = User::popular()->orWhere(function (Builder $query) {
+                    $query->active();
+                })->get();
+            </pre>
+            <p class="description">
+                pero, eloquent te da un metodo que te permite concatenar orWheres entre scopes para hacerlo mas facil de ver
+            </p>
+            <pre class="code">
+
+                $users = User::popular()->orWhere->active()->get();
+            </pre>
+
+            <h4 class="subtitule"><span id="hash">#</span>Scopes Dinamicos</h4>
+            <p class="description">
+                aveces, querras mandara rgumentos a tus scopes locales, para esto, simplemente
+                añadelos desbpues de del primer argumento 
+                <span class="functions">$query</span>
+
+            </p>
+            <pre class="code">
+
+                namespace App\Models;
+ 
+                use Illuminate\Database\Eloquent\Builder;
+                use Illuminate\Database\Eloquent\Model;
+                
+                class User extends Model
+                {
+                    /**
+                    * Scope a query to only include users of a given type.
+                    */
+                    public function scopeOfType(Builder $query, string $type): void
+                    {
+                        $query->where('type', $type);
+                    }
+                }
+            </pre>
+            <p class="description">
+                una vez que definiste los argumentos que tu scope espera, puedes mandar estos
+                mediante su contructor
+            </p>
+            <pre class="code">
+
+                $users = User::ofType('admin')->get();
+            </pre>
+        </section>
+        <section class="section">
+            <h2 class="subtitule"><span id="hash">#</span>Comparando Modelos</h2>
+            <p class="description">
+                Puedes validar si 2 modelos de eloquent son iguales o no lo son mediante
+                los emtodos
+                <span class="functions">is</span>
+                <span class="functions">isNot</span>
+
+                estos metodos evaluaran que ambos modelos sean iguales / no sean iguales 
+                en el sentido de que:
+                <ul class="u-list">
+                    <li>ambos modelos tengan la misma primary key</li>
+                    <li>ambos modelos tengan la tabla</li>
+                    <li>ambos modelos tengan la conexion de base de datos</li>
+                </ul>
+            </p>
+            <pre class="code">
+
+                if ($post->is($anotherPost)) {
+                    // ...
+                }
+                 
+                if ($post->isNot($anotherPost)) {
+                    // ...
+                }
+            </pre>
+            <p class="description">
+                Ademas, los metodos
+                <span class="functions">is</span> y
+                <span class="functions">isNot</span>
+                tambien estan disponibles cuando trabajas con relaciones de tipo
+                <ul class="u-list">
+                    <li>
+                        <span class="functions">belongsTo</span>
+                    </li>
+                    <li>
+                        <span class="functions">hasOne</span>
+                    </li>
+                    <li>
+                        <span class="functions">morphTo</span>
+                    </li>
+                    <li>
+                        <span class="functions">morphOne</span>
+                    </li>
+                </ul>
+            </p>
+            <p class="description">
+                Este metodo es particularmente de ayuda cuando te gustaria
+                comparar un modelo relacionado sin realizar una query 
+                para recuperar dicho modelo
+            </p>
+            <pre class="code">
+
+                if ($post->author()->is($user)) {
+                    // ...
+                }
+            </pre>
+        </section>
+        <section class="section">
+            <h2 class="subtitule"><span id="hash">#</span>Events</h2>
+            <p class="description">
+                Los modelos de eloquent cuentan con un "ciclo de vida de modelos"
+                ( como en Angular o react y sus ciclos de vida de componentes ).
+
+                asi que, puedes capturar distintos ciclos de vida de un modelo, estos son los que puedes
+                capturar:
+
+                <ul class="u-list">
+                    <li>
+                        <span class="functions">retrivied</span>
+                    </li>
+                    <li>
+                        <span class="functions">creating</span>
+                    </li>
+                    <li>
+                        <span class="functions">created</span>
+                    </li>
+                    <li>
+                        <span class="functions">updating</span>
+                    </li>
+                    <li>
+                        <span class="functions">updated</span>
+                    </li>
+                    <li>
+                        <span class="functions">saving</span>
+                    </li>
+                    <li>
+                        <span class="functions">saved</span>
+                    </li>
+                    <li>
+                        <span class="functions">deleting</span>
+                    </li>
+                    <li>
+                        <span class="functions">deleted</span>
+                    </li>
+                    <li>
+                        <span class="functions">trashed</span>
+                    </li>
+                    <li>
+                        <span class="functions">forceDeleting</span>
+                    </li>
+                    <li>
+                        <span class="functions">forceDeleted</span>
+                    </li>
+                    <li>
+                        <span class="functions">restoring</span>
+                    </li>
+                    <li>
+                        <span class="functions">restored</span>
+                    </li>
+                    <li>
+                        <span class="functions">replicating</span>
+                    </li>
+                </ul>
+            </p>
+            <p class="description">
+                Como ves, son muchos, por ejemplo, el evento 
+                <span class="functions">retrivied ( recuperado )</span> va a aejecutarse
+                cuando un modelo de eloquent es recuperado de la tabla ( con find, first, all, get, etc )
+            </p>
+            <p class="description">
+                Cuando un modelo es salvado por primera vez ( <span class="functions">save</span> )
+                , los eventos
+                <span class="functions">creating</span> y
+                <span class="functions">created</span>
+                seran ejecutados.
+            </p>
+            <p class="description">
+                Los metodos
+                <span class="functions">updating</span> y
+                <span class="functions">updated</span>
+                se van a ejecutar cuando un modelo existente es modificado y su metodo 
+                <span class="functions">save</span> es llamado 
+                
+            </p>
+            <p class="description">
+                los eventos
+                <span class="functions">saving</span> y
+                <span class="functions">saved</span>
+                son ejecutados cuando un modelo es creado o actualizado ( incluso si los atributos del modelo
+                no han sido cambiados ).
+            </p>
+            <p class="description">
+                Aunque pueda parecer un lio.. hay una regla general que se muestra en la siguiente tabla
+                <table>
+                    <thead border="1" >
+                        <th> <span class="functions">-ing</span></th>
+                        <th> <span class="functions">-ed</span></th>
+                    </thead>
+                    <tbody>
+                        <td>
+                            Los eventos de la categoria 
+                            <span class="functions"> -ing</span>
+                            se ejecutan ANTES de que los cambios al modelo sean persisitidos
+                        </td>
+                        <td>
+                            Los eventos de la categoria 
+                            <span class="functions"> -ed</span>
+                            se ejecutan DESPUES de que los cambios al modelo sean persisitidos
+                        </td>
+                    </tbody>
+                </table>
+            </p>
+            <p class="description">
+                Para empezar a a "escuchar" los eventos de los modelos, debes definir la propiedad
+                <span class="functions">$dispatchedEvents</span>
+                en tu modelo de eloquent.
+
+                esta propiedad MAPEA varios puntos del ciclo de 
+                vida de modelos de eloquent a tus propias clases de Eventos 
+                ( otro tema que se vera despues , pero es un concepto de observables y suscripcciones )
+            </p>
+            <p class="description">
+                Cada evento del modelo deberia esperar recibir una instancia 
+                de el modelo afectado via constructor
+            </p>
+            <pre class="code">
+
+                namespace App\Models;
+ 
+                use App\Events\UserDeleted;
+                use App\Events\UserSaved;
+                use Illuminate\Foundation\Auth\User as Authenticatable;
+                use Illuminate\Notifications\Notifiable;
+                
+                class User extends Authenticatable
+                {
+                    use Notifiable;
+                
+                    /**
+                    * The event map for the model.
+                    *
+                    * @var array'<'string, string'>'
+                    */
+                    protected $dispatchesEvents = [
+                        'saved' => UserSaved::class,
+                        'deleted' => UserDeleted::class,
+                    ];
+                }
+            </pre>
+            <p class="description">
+                la explicacion anterior dada por laravel puede dar confusiones...
+                pero.. basicamente:
+
+                La propiedad $dispatchesEvents es un array que mapea 
+                ciertos eventos del modelo a clases de eventos
+                 personalizados.
+                 <ul class="u-list">
+                    <li>
+                        <span class="functions">'saved' => UserSaved::class</span>
+                        Esto significa que cada vez que se guarda un modelo User 
+                        (ya sea creado o actualizado)
+                        , se disparará el evento UserSaved.
+                    </li>
+                    <li>
+                        <span class="functions">'deleted' => UserDeleted::class</span>
+                        Esto significa que cada vez que se elimina un modelo 
+                        User, se disparará el evento UserDeleted
+                    </li>
+                 </ul>
+
+            </p>
+
+            <p class="description">
+                En lugar de usar clases de eventos personalizados , tu puedes registrar clousures
+                que se ejecuta algun ciclo de vida de un modelo:
+            </p>
+            <pre class="code">
+                
+                namespace App\Models;
+ 
+                use Illuminate\Database\Eloquent\Model;
+                
+                class User extends Model
+                {
+
+                    /**
+                    * The "booted" method of the model.
+                    */
+                    protected static function booted(): void
+                    {
+                        static::created(function (User $user) {
+                            // ...
+
+                        });
+                    }
+                }
+            </pre>
+            <p class="description">
+                Como ves, esto se realiza en el metodo <span class="functions">booted</span>
+                del modelo.
+                ADICIONALMENTE, puedes utilizar 
+                <span class="functions">queueable anonymus event listeners</span>
+                ( NANI ). cuando registras eventos de modelos, esto le dira a laravel que ejecute 
+                el listener del evento del modelo en el background usando el 
+                <span class="functions">queue</span> de tu aplicacion
+
+                ( varios temas, queue se vera despues )
+            </p>
+            <pre class="code">
+
+                use function Illuminate\Events\queueable;
+                
+                static::created(queueable(function (User $user) {
+                    // ...
+                }));
+            </pre>
+
+            <h2 class="subtitule"><span id="hash">#</span>Observers</h2>
+            <p class="description">
+                ¿Que es un observer?    
+                Un Observer es una clase que escucha eventos específicos 
+                que ocurren en los modelos de Eloquent, como la creación,
+                 actualización o eliminación de registros. 
+                 Puedes usar Observers para ejecutar lógica adicional 
+                 cada vez que uno de estos eventos ocurra.
+            </p>
+            <p class="description">
+                osea, si estas escuchando VARIOS EVENTOS en un modelo, puedes usar una clase de tipo 
+                <span class="functions">Observer</span> para agrupar TODOS los listeners
+                ( manejadores de eventos ) en una simple clase
+            </p>
+            <p class="description">
+                Las clases Observers tienen metodos que se llaman IGUAL que 
+                los eventos de los modelos del ciclo de vida.
+
+                cada uno de estos metodos recibe el moelo afectado como su unico argumento.
+            </p>
+            <p class="description">
+                La manera de generar esta clase es mediante el comando
+                <span class="function">php artisan make:observer "nameObserver" --model="modelName"</span>
+            </p>
+            <p class="description">
+                Este comando generara una nueva clase de tipo 
+                <span class="functions">Observer</span> en el directorio
+                <span class="functions">app/Observers</span>
+                ( si el directorio NO EXISTE artisan lo creara por ti).
+
+                Un observer fresco se vera de la siguiente manera:
+            </p>
+            <pre class="code">
+
+
+                namespace App\Observers;
+ 
+                use App\Models\User;
+                
+                class UserObserver
+                {
+                    /**
+                    * Handle the User "created" event.
+                    */
+                    public function created(User $user): void
+                    {
+                        // ...
+                    }
+                
+                    /**
+                    * Handle the User "updated" event.
+                    */
+                    public function updated(User $user): void
+                    {
+                        // ...
+                    }
+                
+                    /**
+                    * Handle the User "deleted" event.
+                    */
+                    public function deleted(User $user): void
+                    {
+                        // ...
+                    }
+                
+                    /**
+                    * Handle the User "restored" event.
+                    */
+                    public function restored(User $user): void
+                    {
+                        // ...
+                    }
+                
+                    /**
+                    * Handle the User "forceDeleted" event.
+                    */
+                    public function forceDeleted(User $user): void
+                    {
+                        // ...
+                    }
+                }
+            </pre>
+            <p class="description">
+                Para REGISTRAR un observer en laravel 11x deberas usar el atributo
+                <span class="fucntions">ObservedBy</span> en tu modelo
+            </p>
+            <pre class="code">
+
+                use App\Observers\UserObserver;
+                use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+                
+                #[ObservedBy([UserObserver::class])]
+                class User extends Authenticatable
+                {
+                    //
+                }
+            </pre>
+            <p class="description">
+                en laravel 9 la coda cambia... ( ve documentacion )
+            </p>
+            <p class="description">
+                Adicionalmente puedes registrar observers invocando el metodo
+                <span class="functions">observe</span> en el modelo que deseas
+                observar.
+
+                tu puedes registrar observer en el metodo 
+                <span class="functions">boot</span>
+                de la clase <span class="functions">AppServiceProviders</span>
+                de tu aplicacion
+            </p>
+            <pre class="code">  
+
+                use App\Models\User;
+                use App\Observers\UserObserver;
+                
+                /**
+                * Bootstrap any application services.
+                */
+                public function boot(): void
+                {
+                    User::observe(UserObserver::class);
+                }
+            </pre>
+
+            <h4 class="subtitule"><span id="hash">#</span>Observers y transacciones de DATABSE</h4>
+            <p class="description">
+                Las transacciones de base de datos con un conjunto de operaciones de bases de datos AGRUPADAS
+                dentro de un "scope" se le llama 
+                <span class="functions">Begin Transaction</span>
+                <span class="functions">commit</span>
+                <span class="functions">rollback</span>
+                basicamente, todo lo que hagas dentro se tiene que cumplir sin
+                 tirar error, si algo falla, se aplica el rollback
+                y todo vuelve a estar como antes.
+            </p>
+            <p class="description">
+                Entonces, cuando creas un modelo usando una 
+                <span class="functions">Transaccion de base de datos</span>
+                tu puedes querer indicar a un observer que SOLO ejecute sis manejadores
+                de eventos DESPUES de que la transaccion de la DB sea completada ( osea, commiteada )
+            </p>
+            <p class="decsription">
+                Puedes lograr este comportamiento implementando la interfaz
+                 <span class="functions">ShouldHandleEventsAfterCommit</span> en tu Observer, gracias a este interfaz
+                 si una transaccion de base de datos NO esta en progreso, los manejadores de eventos de los modelos
+                 seran ejecutados inmediatamente.
+            </p>
+            <pre class="code">
+
+                namespace App\Observers;
+ 
+                use App\Models\User;
+                use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
+                
+                class UserObserver implements ShouldHandleEventsAfterCommit
+                {
+                    /**
+                    * Handle the User "created" event.
+                    */
+                    public function created(User $user): void
+                    {
+                        // ...
+                    }
+                }
+            </pre>
+
+            <h3 class="subtitule"><span id="hash">#</span>Mutando eventos</h3>
+            <p class="description">
+     
+                Muatar eventos simplemente se refiere a deshabilitar temporalmente la emision de eventos durante ciertas   
+                operaciones con los modelos.
+
+                para lograr esto puedes hacer uso del metodo 
+                <span class="functions">withoutEevents</span>, este metodo acepta una clousure como su unico argumento
+                CUALQUIER CODIGO que ejecutes dentro del clousure se ejecutara sin disparar eventos de modelos. el return se asignara sin problemas
+                a la variable que lo reciba.
+            </p>
+            <pre class="code">
+
+                use App\Models\User;
+                
+                $user = User::withoutEvents(function () {
+                    User::findOrFail(1)->delete();
+                
+                    return User::find(2);
+                });
+            </pre>
+
+            <h3 class="subtitule"><span id="hash">#</span>Salvando un modelo sin disparar EVENTOS</h3>
+            <p class="description">
+                Algunas veces, necesitaras salvar un modelo sin disparar ningun evento del modelo, para lograr esto
+                puedes usar el metodo <span class="functions">saveQuietly</span>
+
+            </p>
+            <pre class="code">
+                
+                $user = User::findOrFail(1);
+ 
+                $user->name = 'Victoria Faith';
+                
+                $user->saveQuietly();
+            </pre>
+            <p class="description">
+                Como extra, puedes hacer "update", "delete", "softDelete", "restore" sin disparar eventos:
+            </p>
+            <pre class="code">
+
+                $user->deleteQuietly();
+                $user->forceDeleteQuietly();
+                $user->restoreQuietly();
+            </pre>
+        </section>
+
+
+</body>
+</html>

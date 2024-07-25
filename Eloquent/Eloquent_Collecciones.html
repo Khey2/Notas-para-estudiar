@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eloquent Collecciones</title>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        background-color: #171923;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 7px;
+    }
+    .section{
+        margin-top: 22px;
+    }
+    .main--title{
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+    .subtitule{
+        margin-bottom: 10px;
+        margin-top: 14px;
+    }
+    #hash{
+        color: rgba(255, 0, 0, 0.709);
+    }
+    .description{
+        padding-left: 26px;
+        line-height: 1.8;
+        font-size: 18px;
+    }
+    .code{
+        background-color: #08090c;
+        margin: 23px 0px;
+    }
+    .sub--subtitule{
+        margin-bottom: 10px;
+        margin-top: 12px;
+    }
+    .u-list{
+        margin-left: 67px;
+        font-size: 18px;
+    }
+    .u-list li::marker{
+        color: red;
+    }
+    .functions{
+        background-color: #252a37 ;
+        color: #eb4432;
+    }
+
+
+    table {
+            border-collapse: collapse;
+            width: 100%;
+            text-align: center;
+        }
+  
+        table, th, td {
+            border: 1px solid white;
+
+        }
+
+        th{
+            padding: 8px;
+            text-align: center;
+        }
+        td{
+            text-align: left;
+        }
+</style>
+<body>
+     <!-- -->
+    <section class="section">
+        <h2 class="subtitle"><span id="hash">#</span>Introduccion </h2>
+        <p class="description">
+            Todos los metodos que se usan al hacer consultas que retornen MAS de un modelo
+            regresaran un tipo de dato llamado Collection que viene de la clase
+            <span class="functions">Illuminate\Database\Eloquent\Collection</span>.
+
+            esto incluye lo que obtengas de get() y de las relaciones.
+        </p>
+        <p class="description">
+            los objetos de la clase Collection heredan de la 
+            <span class="functions">Base Collection</span> ( hay un tema de esto ). 
+            asi que naturalmente las collecciones HEREDAN MUCHOS METODOS para trabajar con el array subyacente de modelos
+            de eloquent ( hay una documentacion dedicada, aqui veremos una introduccion )
+        </p>
+        <p class="description">
+            Todas las Collecciones funcionan como 
+            iteradores, permitiendote recorrerlas como si fueran simples arreglos
+        </p>
+        <pre class="code">
+
+            use App\Models\User;
+            
+            $users = User::where('active', 1)->get();
+            
+            foreach ($users as $user) {
+                echo $user->name;
+            }
+        </pre>
+
+        <p class="description">
+            sin embargo, una colleccion es MAS PODEROSA que un array plano de PHP y te proporciona 
+            muchas operaciones de tipo map y reduce que pueden ser CONCATENADAS de manera intuitiva.
+
+        </p>
+        <p class="description">
+            Por ejemplo, podemos remover todos los modelos inactivos y despues recopilar el 
+            primer nombre de cada usuario restante.
+        </p>
+
+        <pre class="code">
+            
+            $names = User::all()->reject(function (User $user) {
+                return $user->active === false;
+            })->map(function (User $user) {
+                return $user->name;
+            });
+        </pre>
+
+        <h2 class="sub--subtitle"><span id="hash">#</span>Introduccion </h3>
+            <p class="description">
+                Mientras que la mayoría de los métodos de colección Eloquent devuelven
+                una nueva instancia de una colección Eloquent, los métodos collapse, 
+                
+                flatten, flip, keys, pluck y zip devuelven una instancia de colección
+                base. De manera similar, si una operación de map devuelve una colección
+                que no contiene modelos Eloquent, será convertida a una instancia de
+                colección base.
+            </p>
+            
+        <h2 class="sub--subtitle"><span id="hash">#</span> Metodos disponibles en collecciones </h3>
+        <p class="description">
+            Todas las colecciones de eloquent extienden del objeto
+            base llamado <span class="functions">Laravel Collection</span>, por lo tanto, 
+            estas collecciones heredan todos los metodos poderosos proveidos por la clase
+            <span class="functions">coleccion base</span>  ( Otro tema ).
+        </p>
+
+        <p class="description">
+            ademas, la clase 
+            <span class="functions">Illuminate\Database\Eloquent\Collection</span>
+            te da un superset de metodos para ayudar a administrar las colecciones de modelos.
+        </p>
+        <p class="description">
+            Muchos de los metodos retornan una instancia de 
+            <span class="functions">Illuminate\Database\Eloquent\Collection</span>
+            , y algunos metodos como <span class="functions">modelKeys</span> retornan
+            un <span class="functions">Illuminate\Support\Collection</span>.
+        </p>
+    </section>
+
+    <section class="section">
+        <h2 class="subtitle"><span id="hash">#</span>Metodos disponibles</h2>
+
+        <h3 class="subtitle"><span id="hash">#</span>append ( $attributes )</h3>
+        <p class="description">
+            El metodo <span class="functions">append</span> puede ser usado para indicar 
+            que un atributo deberia ser AGREGADO a todos los modelos de una colleccion.
+        </p>
+        <pre class="code">
+            
+            $users->append('team');
+            
+            $users->append(['team', 'is_admin']);
+        </pre>
+        
+        
+        <h3 class="subtitle"><span id="hash">#</span> containes ( $key, $operator = null, $value = null)</h3>
+        <p class="description">
+            el metodo 
+            <span class="functions">Contains </span>
+            puede ser usado para determinar si una instancia de modelo dada 
+            se encuentra dentro de X colleccion
+            ( osea busca UN MODELO EN LA COLLECCION ). este metodo acepta una primary key
+            o una instancia de modelo.
+        </p>
+        <pre class="code">
+            
+            //con primary key
+            $users->contains(1);
+            
+            //Con un modelo
+            $users->contains(User::find(1));
+        </pre>
+        
+
+        <h3 class="subtitle"><span id="hash">#</span> diff($items) </h3>
+        <p class="description">
+            el metodo <span class="functions">diff</span> retorna todos los modelos que NO estan presentes
+            en una colleccion dada
+        </p>
+        <pre class="code">
+            
+            use App\Models\User;
+            
+            $users = $users->diff(User::whereIn('id', [1, 2, 3])->get());
+        </pre>
+        <h3 class="subtitle"><span id="hash">#</span> Except($keys) </h3>
+        <p class="description">
+            Este metodo retorna todos los modelos que no tienen las primary keys dadas
+        </p>
+        <pre class="code">
+            
+            $users = $users->except([1, 2, 3]);
+        </pre>
+
+
+        <h3 class="subtitle"><span id="hash">#</span> find($key) </h3>
+        <p class="description">
+            el metodo <span class="functions">find</span> retorna el modelo que tiene una primary key
+            que matchea con la key que le mandas. si la <span class="functions">$key</span>
+            es una instancia de un modelo, <span class="functions">find</span> va a tratar de retornar modelos
+            los cuales tengan la primary key del array.
+        </p>
+        
+        <h3 class="subtitle"><span id="hash">#</span> fresh( $with = [] ) </h3>
+        <p class="description">
+            el metodo <span class="functions">fresh</span> recupera una instancia fresca 
+            de cada modelo
+            en la colleccion de la database. en adicion,  cualquier relacion que que espesifiques sera cargada
+            como eagle load.
+        </p>
+        <pre class="code">
+
+            $users = $users->fresh();
+ 
+            $users = $users->fresh('comments');
+        </pre>
+
+         
+    </section>
+</body>
+</html>
